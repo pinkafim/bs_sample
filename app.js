@@ -1,6 +1,19 @@
 'use strict';
 
+/* Встроенный SVG-фолбэк на случай офлайна для фото толстовок */
+function hoodieSvg(fill, accent, label) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 480">
+    <rect width="360" height="480" fill="#eef2f7"/>
+    <path d="M126 112c16-24 92-24 108 0l44 26 24 114-42 16-14-64v178H114V204l-14 64-42-16 24-114z" fill="${fill}" stroke="#cbd5e1" stroke-width="4"/>
+    <path d="M142 114c12 34 64 34 76 0" fill="none" stroke="${accent}" stroke-width="6" stroke-linecap="round"/>
+    <path d="M138 278h84v54c0 10-8 18-18 18h-48c-10 0-18-8-18-18z" fill="${accent}" opacity="0.28"/>
+    <text x="180" y="438" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#475569">${label}</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+
 const imageUrls = {
+  // Джинсы (локальные файлы)
   classic: 'images/classic.webp',
   washed: 'images/washed.webp',
   straight: 'images/straight.webp',
@@ -15,6 +28,22 @@ const imageUrls = {
   cable: 'images/cable.webp',
   sneakers: 'images/sneakers.webp',
   denim: 'images/denim.webp',
+  // Толстовки и худи (из приложенных страниц Ozon + SVG fallback при отсутствии сети)
+  h_veneziani: 'https://ir.ozone.ru/s3/multimedia-1-b/wc500/21229350275.jpg',
+  h_club: 'https://ir.ozone.ru/s3/multimedia-1-p/wc500/20684084317.jpg',
+  h_hoodie_dv: 'https://ir.ozone.ru/s3/multimedia-1-m/wc500/20946362998.jpg',
+  h_milk: 'https://ir.ozone.ru/s3/multimedia-1-v/wc500/21154828207.jpg',
+  h_zip: hoodieSvg('#1e293b', '#64748b', 'ЗИП-ХУДИ'),
+  h_oversize: hoodieSvg('#94a3b8', '#475569', 'ХУДИ ОВЕРСАЙЗ'),
+  h_sand: hoodieSvg('#d6cbb8', '#8b7d6b', 'СВИТШОТ БАЗОВЫЙ'),
+  h_navy: hoodieSvg('#1e3a5f', '#60a5fa', 'ТОЛСТОВКА ФЛИС'),
+};
+
+const fallbackHoodieByKey = {
+  h_veneziani: hoodieSvg('#18181b', '#52525b', 'DON VENEZIANI'),
+  h_club: hoodieSvg('#111827', '#4b5563', 'CLUB HOODIE'),
+  h_hoodie_dv: hoodieSvg('#334155', '#94a3b8', 'ХУДИ ОВЕРСАЙЗ'),
+  h_milk: hoodieSvg('#f3efe6', '#c8bfa8', 'ХУДИ МОЛОЧНЫЙ'),
 };
 
 const points = {
@@ -23,30 +52,30 @@ const points = {
 };
 
 const categories = {
-  clothes: 'Одежда',
-  homeware: 'Для дома',
-  electronics: 'Электроника',
-  office: 'Канцелярия',
-  shoes: 'Обувь',
+  jeans: 'Джинсы',
+  hoodies: 'Толстовки и худи',
 };
 
-/* 3 уровня продвижения + без продвижения */
+/* 3 уровня продвижения с реалистичными ценами: 100 / 150 / 300 ₽ */
 const PROMO_TIERS = {
   1: {
     tier: 1,
     rank: 1,
     code: '1 класс',
     name: 'Первый класс',
-    subtitle: 'Премиум-приоритет в топе выдачи',
-    price: 2990,
+    subtitle: 'Максимальный приоритет в выдаче',
+    price: 300,
     boostLabel: '+300% к показам',
+    viewsMult: 4.0,
+    ctr: 0.068,
+    cr: 0.095,
     stars: '★★★',
     badge: '1 класс · Топ',
     colorClass: 'tier-1',
     perks: [
-      'Максимальный приоритет в выдаче после точной релевантности',
-      'Премиум-корона на карточке и в блоке магазина',
-      'Голографическая подсветка в кабинете и приоритет в рекомендациях',
+      'Топ выдачи внутри своей группы релевантности',
+      'Премиум-корона на кнопке карточки у покупателей',
+      'Максимальный охват и приоритет в рекомендациях',
     ],
   },
   2: {
@@ -54,16 +83,19 @@ const PROMO_TIERS = {
     rank: 2,
     code: '2 класс',
     name: 'Второй класс',
-    subtitle: 'Бизнес-буст выше 3 класса и органики',
-    price: 1290,
-    boostLabel: '+120% к показам',
+    subtitle: 'Ускорение выше 3 класса и органики',
+    price: 150,
+    boostLabel: '+130% к показам',
+    viewsMult: 2.3,
+    ctr: 0.052,
+    cr: 0.082,
     stars: '★★',
     badge: '2 класс · Буст',
     colorClass: 'tier-2',
     perks: [
       'Вывод выше 3 класса и товаров без продвижения',
-      'Синяя метка ускорения и выделение карточки в каталоге',
-      'Повышенная видимость в модуле «Другие предложения»',
+      'Оптимальный баланс стоимости (150 ₽) и охвата',
+      'Повышенная видимость в похожих предложениях',
     ],
   },
   3: {
@@ -72,15 +104,18 @@ const PROMO_TIERS = {
     code: '3 класс',
     name: 'Третий класс',
     subtitle: 'Стартовое поднятие над органикой',
-    price: 490,
-    boostLabel: '+45% к показам',
+    price: 100,
+    boostLabel: '+55% к показам',
+    viewsMult: 1.55,
+    ctr: 0.041,
+    cr: 0.072,
     stars: '★',
     badge: '3 класс · Старт',
     colorClass: 'tier-3',
     perks: [
       'Приоритет над всеми товарами без продвижения',
-      'Аккуратная метка продвижения в поисковой выдаче',
-      'Оптимально для старта продаж и тестирования карточек',
+      'Доступная цена 100 ₽ для теста новых карточек',
+      'Быстрый набор первых кликов и отзывов',
     ],
   },
   0: {
@@ -88,43 +123,57 @@ const PROMO_TIERS = {
     rank: 4,
     code: 'Без продвижения',
     name: 'Органика',
-    subtitle: 'Базовое размещение без буста',
+    subtitle: 'Базовая выдача',
     price: 0,
     boostLabel: 'Базовые показы',
+    viewsMult: 1.0,
+    ctr: 0.031,
+    cr: 0.062,
     stars: '—',
-    badge: 'Без продвижения',
+    badge: 'Органика',
     colorClass: 'tier-0',
-    perks: ['Обычная выдача после товаров 1, 2 и 3 класса'],
+    perks: ['Обычное размещение после товаров 1, 2 и 3 класса'],
   },
 };
 
 const defaultProducts = [
-  { id: 'classic', sku: '601284101', category: 'clothes', name: 'Джинсы утеплённые с флисом', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 8990, cheap: 2290, recent: 1, rating: 4.8, reviews: 735, left: 14, verified: true, seller: 'Denim Store', promoTier: 2 },
-  { id: 'washed', sku: '601284102', category: 'clothes', name: 'Джинсы широкие свободного кроя', color: 'Графитовые', sizes: ['S', 'M', 'L', 'XL'], price: 3190, oldPrice: 12400, cheap: 2790, recent: 2, rating: 4.9, reviews: 2140, left: 9, verified: true, seller: 'Denim Store', promoTier: 1 },
-  { id: 'straight', sku: '601284103', category: 'clothes', name: 'Джинсы прямые классические', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 3590, oldPrice: 9800, cheap: 3290, recent: 3, rating: 4.9, reviews: 1660, left: 24, verified: true, seller: 'Denim Store', promoTier: 2 },
-  { id: 'shirt', sku: '601284104', category: 'clothes', name: 'Джинсы багги из плотного денима', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2490, oldPrice: 8700, cheap: 2190, recent: 4, rating: 4.8, reviews: 985, left: 31, verified: true, seller: 'Denim Store', promoTier: 3 },
-  { id: 'socks', sku: '601284105', category: 'clothes', name: 'Джинсы свободные с потёртостями', color: 'Голубые', sizes: ['S', 'M', 'L', 'XL'], price: 2890, oldPrice: 7900, cheap: 2590, recent: 5, rating: 4.9, reviews: 520, left: 45, verified: false, seller: 'Denim Store', promoTier: 0 },
-  { id: 'ivory', sku: '601284106', category: 'clothes', name: 'Джинсы бананы', color: 'Светло-голубые', sizes: ['S', 'M', 'L', 'XL'], price: 2690, oldPrice: 9500, cheap: 2390, recent: 6, rating: 4.9, reviews: 4120, left: 19, verified: true, seller: 'Denim Store', promoTier: 3 },
-  { id: 'navy', sku: '601284107', category: 'clothes', name: 'Джинсы прямого кроя', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2790, oldPrice: 6550, cheap: 2490, recent: 7, rating: 4.8, reviews: 531, left: 27, verified: false, seller: 'Denim Store', promoTier: 0 },
-  { id: 'towel', sku: '601284108', category: 'clothes', name: 'Джинсы широкие на каждый день', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2290, oldPrice: 5190, cheap: 2090, recent: 8, rating: 4.9, reviews: 291, left: 62, verified: false, seller: 'Denim Store', promoTier: 0 },
-  { id: 'mug', sku: '601284109', category: 'clothes', name: 'Джинсы зауженного кроя', color: 'Тёмно-синие', sizes: ['S', 'M', 'L', 'XL'], price: 2390, oldPrice: 6990, cheap: 2190, recent: 9, rating: 4.9, reviews: 1020, left: 18, verified: true, seller: 'Denim Store', promoTier: 0 },
-  { id: 'gel', sku: '601284110', category: 'clothes', name: 'Джинсы широкие из тяжёлого денима', color: 'Тёмно-синие', sizes: ['S', 'M', 'L', 'XL'], price: 3290, oldPrice: 11050, cheap: 2990, recent: 10, rating: 4.8, reviews: 1396, left: 11, verified: true, seller: 'Denim Store', promoTier: 2 },
-  { id: 'notebook', sku: '601284111', category: 'clothes', name: 'Джинсы багги', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 8360, cheap: 2290, recent: 11, rating: 4.9, reviews: 596, left: 52, verified: false, seller: 'Denim Store', promoTier: 0 },
-  { id: 'cable', sku: '601284112', category: 'clothes', name: 'Джинсы стрейч', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 2190, oldPrice: 10000, cheap: 1990, recent: 12, rating: 4.9, reviews: 171, left: 33, verified: true, seller: 'Denim Store', promoTier: 3 },
-  { id: 'sneakers', sku: '601284113', category: 'clothes', name: 'Джинсы стрейч классические', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2290, oldPrice: 7490, cheap: 2090, recent: 13, rating: 4.8, reviews: 842, left: 29, verified: false, seller: 'Denim Store', promoTier: 0 },
-  { id: 'denim', sku: '601284114', category: 'clothes', name: 'Джинсы широкие с высокой посадкой', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2990, oldPrice: 15000, cheap: 2690, recent: 14, rating: 4.9, reviews: 5401, left: 6, verified: true, seller: 'Denim Store', promoTier: 1 },
+  // КАТЕГОРИЯ: ДЖИНСЫ
+  { id: 'classic', sku: '601284101', category: 'jeans', name: 'Джинсы утеплённые с флисом', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 6990, cheap: 2290, recent: 1, rating: 4.8, reviews: 735, left: 14, verified: true, seller: 'Denim Store', tags: ['джинсы', 'брюки', 'утепленные', 'флис'], promoTier: 2 },
+  { id: 'washed', sku: '601284102', category: 'jeans', name: 'Джинсы широкие свободного кроя', color: 'Графитовые', sizes: ['S', 'M', 'L', 'XL'], price: 3190, oldPrice: 8400, cheap: 2790, recent: 2, rating: 4.9, reviews: 2140, left: 9, verified: true, seller: 'Denim Store', tags: ['джинсы', 'оверсайз', 'широкие'], promoTier: 1 },
+  { id: 'straight', sku: '601284103', category: 'jeans', name: 'Джинсы прямые классические', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 3590, oldPrice: 7800, cheap: 3290, recent: 3, rating: 4.9, reviews: 1660, left: 24, verified: true, seller: 'Denim Store', tags: ['джинсы', 'прямые'], promoTier: 2 },
+  { id: 'shirt', sku: '601284104', category: 'jeans', name: 'Джинсы багги из плотного денима', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2490, oldPrice: 6700, cheap: 2190, recent: 4, rating: 4.8, reviews: 985, left: 31, verified: true, seller: 'Denim Store', tags: ['джинсы', 'багги', 'черные', 'оверсайз'], promoTier: 3 },
+  { id: 'socks', sku: '601284105', category: 'jeans', name: 'Джинсы свободные с потёртостями', color: 'Голубые', sizes: ['S', 'M', 'L', 'XL'], price: 2890, oldPrice: 6200, cheap: 2590, recent: 5, rating: 4.9, reviews: 520, left: 45, verified: false, seller: 'Denim Store', tags: ['джинсы', 'свободные'], promoTier: 0 },
+  { id: 'ivory', sku: '601284106', category: 'jeans', name: 'Джинсы бананы', color: 'Светло-голубые', sizes: ['S', 'M', 'L', 'XL'], price: 2690, oldPrice: 6500, cheap: 2390, recent: 6, rating: 4.9, reviews: 4120, left: 19, verified: true, seller: 'Denim Store', tags: ['джинсы', 'бананы'], promoTier: 3 },
+  { id: 'navy', sku: '601284107', category: 'jeans', name: 'Джинсы прямого кроя', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2790, oldPrice: 5550, cheap: 2490, recent: 7, rating: 4.8, reviews: 531, left: 27, verified: false, seller: 'Denim Store', tags: ['джинсы', 'черные'], promoTier: 0 },
+  { id: 'towel', sku: '601284108', category: 'jeans', name: 'Джинсы широкие на каждый день', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2290, oldPrice: 4990, cheap: 2090, recent: 8, rating: 4.9, reviews: 291, left: 62, verified: false, seller: 'Denim Store', tags: ['джинсы', 'широкие'], promoTier: 0 },
+  { id: 'mug', sku: '601284109', category: 'jeans', name: 'Джинсы зауженного кроя', color: 'Тёмно-синие', sizes: ['S', 'M', 'L', 'XL'], price: 2390, oldPrice: 5990, cheap: 2190, recent: 9, rating: 4.9, reviews: 1020, left: 18, verified: true, seller: 'Denim Store', tags: ['джинсы'], promoTier: 0 },
+  { id: 'gel', sku: '601284110', category: 'jeans', name: 'Джинсы широкие из тяжёлого денима', color: 'Тёмно-синие', sizes: ['S', 'M', 'L', 'XL'], price: 3290, oldPrice: 8050, cheap: 2990, recent: 10, rating: 4.8, reviews: 1396, left: 11, verified: true, seller: 'Denim Store', tags: ['джинсы', 'широкие'], promoTier: 2 },
+  { id: 'notebook', sku: '601284111', category: 'jeans', name: 'Джинсы багги', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 6360, cheap: 2290, recent: 11, rating: 4.9, reviews: 596, left: 52, verified: false, seller: 'Denim Store', tags: ['джинсы', 'багги', 'черные'], promoTier: 0 },
+  { id: 'cable', sku: '601284112', category: 'jeans', name: 'Джинсы стрейч', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 2190, oldPrice: 5400, cheap: 1990, recent: 12, rating: 4.9, reviews: 171, left: 33, verified: true, seller: 'Denim Store', tags: ['джинсы', 'стрейч'], promoTier: 3 },
+  { id: 'sneakers', sku: '601284113', category: 'jeans', name: 'Джинсы стрейч классические', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2290, oldPrice: 5490, cheap: 2090, recent: 13, rating: 4.8, reviews: 842, left: 29, verified: false, seller: 'Denim Store', tags: ['джинсы', 'черные'], promoTier: 0 },
+  { id: 'denim', sku: '601284114', category: 'jeans', name: 'Джинсы широкие с высокой посадкой', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2990, oldPrice: 9200, cheap: 2690, recent: 14, rating: 4.9, reviews: 5401, left: 6, verified: true, seller: 'Denim Store', tags: ['джинсы', 'черные', 'широкие'], promoTier: 1 },
+
+  // КАТЕГОРИЯ: ТОЛСТОВКИ И ХУДИ
+  { id: 'h_veneziani', sku: '702481372', category: 'hoodies', name: 'Толстовка DON VENEZIANI с капюшоном', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2190, oldPrice: 7900, cheap: 1990, recent: 15, rating: 4.9, reviews: 148, left: 8, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'черные', 'кофта'], promoTier: 1 },
+  { id: 'h_milk', sku: '702481373', category: 'hoodies', name: 'Худи мужской оверсайз с начёсом молочный', color: 'Молочный', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 5900, cheap: 2390, recent: 16, rating: 4.9, reviews: 864, left: 12, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'оверсайз', 'утепленные', 'флис', 'начес'], promoTier: 2 },
+  { id: 'h_hoodie_dv', sku: '702481374', category: 'hoodies', name: 'Худи DON VENEZIANI утеплённый', color: 'Графитовые', sizes: ['S', 'M', 'L', 'XL'], price: 2390, oldPrice: 5200, cheap: 2150, recent: 17, rating: 4.8, reviews: 503, left: 17, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'утепленные'], promoTier: 3 },
+  { id: 'h_club', sku: '702481375', category: 'hoodies', name: 'Толстовка Club BB Hoodie базовая', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 3290, oldPrice: 6490, cheap: 2990, recent: 18, rating: 4.7, reviews: 412, left: 26, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'черные'], promoTier: 2 },
+  { id: 'h_zip', sku: '702481376', category: 'hoodies', name: 'Толстовка на молнии зип-худи оверсайз', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2890, oldPrice: 6100, cheap: 2590, recent: 19, rating: 4.9, reviews: 629, left: 15, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'зип', 'оверсайз', 'черные'], promoTier: 1 },
+  { id: 'h_oversize', sku: '702481377', category: 'hoodies', name: 'Худи свободного кроя плотный футер', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2490, oldPrice: 4990, cheap: 2290, recent: 20, rating: 4.8, reviews: 318, left: 40, verified: false, seller: 'Denim Store', tags: ['толстовка', 'худи', 'свободные', 'оверсайз'], promoTier: 0 },
+  { id: 'h_sand', sku: '702481378', category: 'hoodies', name: 'Толстовка свитшот базовый хлопковый', color: 'Бежевый', sizes: ['S', 'M', 'L', 'XL'], price: 1990, oldPrice: 4200, cheap: 1790, recent: 21, rating: 4.8, reviews: 214, left: 34, verified: false, seller: 'Denim Store', tags: ['толстовка', 'свитшот'], promoTier: 3 },
+  { id: 'h_navy', sku: '702481379', category: 'hoodies', name: 'Толстовка утеплённая с флисом', color: 'Тёмно-синие', sizes: ['S', 'M', 'L', 'XL'], price: 2690, oldPrice: 5400, cheap: 2450, recent: 22, rating: 4.9, reviews: 390, left: 22, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'утепленные', 'флис'], promoTier: 0 },
 ];
 
 let products = defaultProducts.map(p => ({ ...p }));
 
 const stock = [
-  { id: 'J-M-01', product: 'classic', point: 'mira', size: 'M', price: 2590, condition: 'Без видимых дефектов' },
-  { id: 'J-L-02', product: 'classic', point: 'yara', size: 'L', price: 2590, condition: 'Допущен к повторной продаже' },
-  { id: 'J-S-03', product: 'washed', point: 'yara', size: 'S', price: 3190, condition: 'Без видимых дефектов' },
-  { id: 'J-M-04', product: 'straight', point: 'mira', size: 'M', price: 3590, condition: 'Без видимых дефектов' },
-  { id: 'T-L-05', product: 'shirt', point: 'mira', size: 'L', price: 2490, condition: 'Допущен к повторной продаже' },
-  { id: 'T-M-06', product: 'ivory', point: 'mira', size: 'M', price: 2690, condition: 'Допущен к повторной продаже' },
-  { id: 'T-L-07', product: 'navy', point: 'yara', size: 'L', price: 2790, condition: 'Допущен к повторной продаже' },
+  { id: 'J-M-01', product: 'classic', point: 'mira', size: 'M', price: 2590 },
+  { id: 'J-L-02', product: 'classic', point: 'yara', size: 'L', price: 2590 },
+  { id: 'J-S-03', product: 'washed', point: 'yara', size: 'S', price: 3190 },
+  { id: 'J-M-04', product: 'straight', point: 'mira', size: 'M', price: 3590 },
+  { id: 'H-M-05', product: 'h_milk', point: 'mira', size: 'M', price: 2590 },
+  { id: 'H-L-06', product: 'h_veneziani', point: 'mira', size: 'L', price: 2190 },
+  { id: 'H-M-07', product: 'h_zip', point: 'yara', size: 'M', price: 2890 },
 ];
 
 const app = document.querySelector('#app');
@@ -133,6 +182,7 @@ const notice = document.querySelector('#notice');
 const fxLayer = document.querySelector('#fxLayer');
 
 const state = {
+  mode: 'buyer', // 'buyer' | 'seller'
   page: 'home',
   from: 'home',
   q: '',
@@ -140,7 +190,6 @@ const state = {
   sort: 'relevance',
   only: false,
   verifiedOnly: false,
-  tierFilter: 'all',
   priceMin: '',
   priceMax: '',
   point: 'mira',
@@ -149,14 +198,19 @@ const state = {
   offer: 'fast',
   unit: '',
   tab: 'fast',
-  sellerTab: 'promo',
-  sellerSelectedProduct: 'classic',
-  sellerBalance: 15000,
-  simQuery: 'джинсы',
-  promoModalTier: null,
+  // Состояние кабинета Селлера
+  sellerTab: 'promo', // 'promo' | 'live' | 'analytics' | 'products'
+  sellerSelectedProduct: 'h_milk',
+  sellerCatFilter: 'all',
+  sellerBalance: 1500,
+  sellerSpent: 1550,
+  liveQuery: '',
+  liveCategory: '',
+  liveTierFilter: 'all',
   lastUpgraded: null,
+  // Покупательские данные
   favorites: new Set(),
-  cart: [],
+  cart: [], // { key, id?, product, size, point, price, slot, qty }
   reserved: new Set(),
   completed: new Set(),
   order: [],
@@ -172,13 +226,23 @@ const unitById = id => stock.find(x => x.id === id);
 const isFree = x => !state.reserved.has(x.id) && !state.completed.has(x.id);
 const unitsFor = (p, size = null) => stock.filter(x => x.product === p.id && x.point === state.point && (!size || x.size === size) && isFree(x));
 const tierRank = tier => (PROMO_TIERS[tier]?.rank ?? 4);
+const imgFor = p => imageUrls[p.imgKey || p.id] || imageUrls.classic;
+const imgFallbackAttr = p => {
+  const fb = fallbackHoodieByKey[p.imgKey || p.id];
+  return fb ? `referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fb}'"` : '';
+};
+
+const totalCartUnits = () => state.cart.reduce((s, item) => s + (item.qty || 1), 0);
+const cartItemForProduct = (productId, size = null) =>
+  state.cart.find(item => item.product === productId && (!size || item.size === size));
 
 const offerTabs = [['fast', 'Быстрее доставка'], ['cheap', 'Ниже цена'], ['local', 'Уже в ПВЗ']];
-const storageKey = 'ozon-mvp-v5-seller';
+const storageKey = 'ozon-mvp-v6-dualmode';
 
 function saveSession() {
   try {
-    const payload = {
+    localStorage.setItem(storageKey, JSON.stringify({
+      mode: state.mode,
       cart: state.cart,
       order: state.order,
       orders: state.orders,
@@ -187,47 +251,60 @@ function saveSession() {
       completed: [...state.completed],
       point: state.point,
       sellerBalance: state.sellerBalance,
+      sellerSpent: state.sellerSpent,
+      sellerSelectedProduct: state.sellerSelectedProduct,
       products,
-    };
-    localStorage.setItem(storageKey, JSON.stringify(payload));
-  } catch { /* ignore storage restrictions */ }
+    }));
+  } catch { /* ignore */ }
 }
 
 function restoreSession() {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
     if (Array.isArray(saved.products) && saved.products.length) products = saved.products;
+    if (saved.mode === 'buyer' || saved.mode === 'seller') state.mode = saved.mode;
     for (const k of ['cart', 'order', 'orders']) if (Array.isArray(saved[k])) state[k] = saved[k];
     for (const k of ['favorites', 'reserved', 'completed']) if (Array.isArray(saved[k])) state[k] = new Set(saved[k]);
     if (points[saved.point]) state.point = saved.point;
     if (typeof saved.sellerBalance === 'number') state.sellerBalance = saved.sellerBalance;
+    if (typeof saved.sellerSpent === 'number') state.sellerSpent = saved.sellerSpent;
+    if (saved.sellerSelectedProduct && productById(saved.sellerSelectedProduct)) {
+      state.sellerSelectedProduct = saved.sellerSelectedProduct;
+    }
   } catch { /* fresh state */ }
 }
 
 /* =========================================================
-   РАНГ И РЕЛЕВАНТНОСТЬ:
-   Релевантность > 1 класс > 2 класс > 3 класс > Без продвижения
+   АЛГОРИТМ РАНЖИРОВАНИЯ:
+   Релевантность -> 1 класс -> 2 класс -> 3 класс -> Органика
    ========================================================= */
-function tokenize(text) {
-  const aliases = { футболки: 'футболк', кружки: 'кружк', полотенца: 'полотенц', носки: 'носк', кроссовки: 'кеды', черные: 'чёрн', чёрные: 'чёрн', утепленные: 'утепл', утеплённые: 'утепл', широкие: 'широк', прямые: 'прям' };
-  return text
-    .trim()
-    .toLocaleLowerCase('ru')
-    .replace(/ё/g, 'е')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(w => (aliases[w] || w).replace(/ё/g, 'е'));
+function normalizeTerm(word) {
+  const w = word.toLocaleLowerCase('ru').replace(/ё/g, 'е');
+  const map = {
+    толстовка: 'толстовк', толстовки: 'толстовк', толстовок: 'толстовк',
+    джинсы: 'джинс', джинс: 'джинс',
+    черные: 'черн', черный: 'черн', черная: 'черн',
+    широкие: 'широк', широкая: 'широк',
+    прямые: 'прям', прямой: 'прям',
+    утепленные: 'утепл', утепленный: 'утепл',
+    свободные: 'свободн', свободного: 'свободн',
+    молочный: 'молочн', молочная: 'молочн',
+    начесом: 'начес', начес: 'начес',
+    флисом: 'флис', флис: 'флис',
+  };
+  return map[w] || w;
 }
 
 function relevanceScore(p, rawQuery) {
   const q = rawQuery.trim();
-  if (!q) return 1; // Без текстового запроса все товары категории равнорелевантны
-  const norm = s => String(s).toLocaleLowerCase('ru').replace(/ё/g, 'е');
+  if (!q) return 1;
+  const norm = s => String(s || '').toLocaleLowerCase('ru').replace(/ё/g, 'е');
   const name = norm(p.name);
   const color = norm(p.color);
   const sku = norm(p.sku);
-  const full = `${name} ${color} ${sku} ${norm(p.seller)}`;
-  const terms = tokenize(q);
+  const tags = (p.tags || []).map(norm).join(' ');
+  const full = `${name} ${color} ${sku} ${tags}`;
+  const terms = q.split(/\s+/).filter(Boolean).map(normalizeTerm);
 
   if (!terms.every(t => full.includes(t))) return 0;
 
@@ -235,12 +312,12 @@ function relevanceScore(p, rawQuery) {
   const qNorm = norm(q);
   if (sku === qNorm || name === qNorm) return 100;
 
+  const words = name.split(/[^а-яa-z0-9]+/i).filter(Boolean);
   for (const t of terms) {
-    const words = name.split(/[^а-яa-z0-9]+/i).filter(Boolean);
-    if (words.some(w => w === t)) score += 3;
-    else if (words.some(w => w.startsWith(t))) score += 2;
-    else if (name.includes(t)) score += 1;
-    else if (color.includes(t)) score += 1;
+    if (words.some(w => w === t || w.startsWith(t))) score += 4;
+    else if (name.includes(t)) score += 3;
+    else if (color.includes(t)) score += 2;
+    else if (tags.includes(t)) score += 1;
   }
   return Math.max(1, score);
 }
@@ -255,7 +332,6 @@ function rankProducts(list, rawQuery = '', sortMode = 'relevance') {
     if (sortMode === 'dear') return b.p.price - a.p.price || tierRank(a.p.promoTier) - tierRank(b.p.promoTier);
     if (sortMode === 'new') return b.p.recent - a.p.recent || tierRank(a.p.promoTier) - tierRank(b.p.promoTier);
 
-    // Базовое правило: Релевантность > 1 класс > 2 класс > 3 класс > Без продвижения
     if (b.rel !== a.rel) return b.rel - a.rel;
     const tr = tierRank(a.p.promoTier) - tierRank(b.p.promoTier);
     if (tr !== 0) return tr;
@@ -267,15 +343,20 @@ function rankProducts(list, rawQuery = '', sortMode = 'relevance') {
 }
 
 /* =========================================================
-   HASH-МАРШРУТИЗАЦИЯ (работает и на file://, и на http://)
+   МАРШРУТИЗАЦИЯ
    ========================================================= */
 function routeURL(page, changes = {}) {
   const r = { ...state, ...changes };
+  if (r.mode === 'seller') {
+    const sp = new URLSearchParams();
+    if (r.sellerTab && r.sellerTab !== 'promo') sp.set('tab', r.sellerTab);
+    return '#/seller' + (sp.size ? '?' + sp : '');
+  }
   const paths = {
-    home: '/', catalog: '/search', nearby: '/nearby', seller: '/seller',
+    home: '/', catalog: '/search', nearby: '/nearby',
     favorites: '/favorites', orders: '/orders', cart: '/cart',
     checkout: '/checkout', result: '/orders/confirmation',
-    bought: '/orders/completed', declined: '/orders/declined', ops: '/ops',
+    bought: '/orders/completed', declined: '/orders/declined',
   };
   let path = paths[page] || '/';
   const params = new URLSearchParams();
@@ -292,7 +373,6 @@ function routeURL(page, changes = {}) {
     if (r.sort && r.sort !== 'relevance') params.set('sort', r.sort);
     if (r.only) params.set('nearby', '1');
   }
-  if (page === 'seller' && r.sellerTab && r.sellerTab !== 'promo') params.set('tab', r.sellerTab);
   return '#' + path + (params.size ? '?' + params : '');
 }
 
@@ -302,11 +382,19 @@ function readRoute() {
   const path = pathPart.replace(/\/+$/, '') || '/';
   const params = new URLSearchParams(searchPart || '');
 
+  if (path === '/seller') {
+    state.mode = 'seller';
+    const t = params.get('tab');
+    state.sellerTab = ['promo', 'live', 'analytics', 'products'].includes(t) ? t : 'promo';
+    return;
+  }
+
+  state.mode = 'buyer';
   const pages = {
-    '/': 'home', '/search': 'catalog', '/nearby': 'nearby', '/seller': 'seller',
+    '/': 'home', '/search': 'catalog', '/nearby': 'nearby',
     '/favorites': 'favorites', '/orders': 'orders', '/cart': 'cart',
     '/checkout': 'checkout', '/orders/confirmation': 'result',
-    '/orders/completed': 'bought', '/orders/declined': 'declined', '/ops': 'ops',
+    '/orders/completed': 'bought', '/orders/declined': 'declined',
   };
   const productRoute = path.match(/^\/product\/([^/]+)(\/offers)?$/);
   state.page = pages[path] || 'home';
@@ -315,10 +403,6 @@ function readRoute() {
     state.category = categories[params.get('category')] ? params.get('category') : '';
     state.sort = ['relevance', 'popular', 'new', 'cheap', 'dear'].includes(params.get('sort')) ? params.get('sort') : 'relevance';
     state.only = params.get('nearby') === '1';
-  }
-  if (state.page === 'seller') {
-    const t = params.get('tab');
-    if (['promo', 'products', 'simulator'].includes(t)) state.sellerTab = t;
   }
   if (productRoute) {
     const p = productById(decodeURIComponent(productRoute[1]));
@@ -351,11 +435,11 @@ function say(message) {
   notice.textContent = message;
   notice.hidden = false;
   clearTimeout(say.timer);
-  say.timer = setTimeout(() => { notice.hidden = true; }, 2600);
+  say.timer = setTimeout(() => { notice.hidden = true; }, 2400);
 }
 
 /* =========================================================
-   ЭФФЕКТЫ И АНИМАЦИИ ПРИ ПОКУПКЕ УРОВНЯ ПРОДВИЖЕНИЯ
+   ЭФФЕКТЫ ПОКУПКИ ПОДПИСКИ (SELLER)
    ========================================================= */
 function triggerTierPurchaseFX(tier, productName) {
   const info = PROMO_TIERS[tier];
@@ -367,28 +451,26 @@ function triggerTierPurchaseFX(tier, productName) {
     3: ['#00a6a6', '#10c44c', '#34d399', '#ffffff'],
   };
   const colors = palettes[tier] || palettes[2];
-  const count = tier === 1 ? 56 : tier === 2 ? 28 : 16;
+  const count = tier === 1 ? 52 : tier === 2 ? 26 : 14;
 
-  // Ударная волна
   const ring = document.createElement('div');
   ring.className = 'fx-ring';
   ring.style.setProperty('--ring-color', colors[0]);
   fxLayer.appendChild(ring);
   setTimeout(() => ring.remove(), 800);
 
-  // Частицы / конфетти из центра экрана
   const cx = window.innerWidth / 2;
   const cy = window.innerHeight * 0.42;
   for (let i = 0; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'fx-particle';
     const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-    const dist = (tier === 1 ? 260 : 170) + Math.random() * 200;
+    const dist = (tier === 1 ? 250 : 160) + Math.random() * 190;
     el.style.left = `${cx}px`;
     el.style.top = `${cy}px`;
     el.style.background = colors[i % colors.length];
-    el.style.width = `${6 + Math.random() * 8}px`;
-    el.style.height = `${6 + Math.random() * 10}px`;
+    el.style.width = `${6 + Math.random() * 7}px`;
+    el.style.height = `${6 + Math.random() * 9}px`;
     el.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
     el.style.setProperty('--dy', `${Math.sin(angle) * dist + 110}px`);
     el.style.setProperty('--rot', `${(Math.random() - 0.5) * 720}deg`);
@@ -397,13 +479,12 @@ function triggerTierPurchaseFX(tier, productName) {
     setTimeout(() => el.remove(), 1600);
   }
 
-  // Анимированный баннер уровня
   const banner = document.createElement('div');
   banner.className = `fx-banner t${tier}`;
   banner.innerHTML = `
     <span style="font-size:20px">${tier === 1 ? '👑' : tier === 2 ? '⚡' : '🚀'}</span>
     <div>
-      <div>Подключён ${info.name} (${info.code})!</div>
+      <div>Подключён ${info.name} (${info.code}) · ${rub(info.price)}</div>
       <div style="font-size:12px;font-weight:500;opacity:.92">${clean(productName)} · ${info.boostLabel}</div>
     </div>
   `;
@@ -413,18 +494,19 @@ function triggerTierPurchaseFX(tier, productName) {
     banner.style.opacity = '0';
     banner.style.transform = 'translate(-50%, -14px)';
     setTimeout(() => banner.remove(), 320);
-  }, 2600);
+  }, 2500);
 }
 
 /* =========================================================
-   ИКОНКИ И КОМПОНЕНТЫ
+   ИКОНКИ И КАРТОЧКИ
    ========================================================= */
 const svgHeart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 const svgCheck = '<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 2c3.723 0 6 2.277 6 6s-2.277 6-6 6-6-2.277-6-6 2.277-6 6-6m2.707 4.293a1 1 0 0 0-1.414 0L7.5 8.086l-.793-.793a1 1 0 1 0-1.414 1.414l1.5 1.5a1 1 0 0 0 1.414 0l2.5-2.5a1 1 0 0 0 0-1.414"/></svg>';
-const svgCrown = '<svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 8c-1.11 0-1 3.563-1 6.375C3 18.125 4.501 20 12.001 20s9-1.875 9-5.625C21 11.563 21.11 8 20 8c-1 0-1.824 2.425-2.57 3.39-.43.556-.622.641-.961-.171C15.8 9.619 14 5 12 5s-3.8 4.619-4.469 6.219c-.34.812-.531.726-.96.172C5.824 10.425 5 8 4 8"/></svg>';
+const svgCrownSmall = '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 8c-1.11 0-1 3.563-1 6.375C3 18.125 4.501 20 12.001 20s9-1.875 9-5.625C21 11.563 21.11 8 20 8c-1 0-1.824 2.425-2.57 3.39-.43.556-.622.641-.961-.171C15.8 9.619 14 5 12 5s-3.8 4.619-4.469 6.219c-.34.812-.531.726-.96.172C5.824 10.425 5 8 4 8"/></svg>';
 const svgBag = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M10.19 1.393a.834.834 0 0 1 1.084.465L12.73 5.5h.842c.896 0 1.345 0 1.594.288s.185.732.056 1.619l-.227 1.553c-.396 2.721-.593 4.082-1.532 4.895s-2.315.812-5.065.812H7.6c-2.75 0-4.126 0-5.065-.812S1.4 11.68 1.003 8.96L.777 7.407C.648 6.52.584 6.077.833 5.788c.25-.288.698-.288 1.594-.288h.842l1.457-3.642a.834.834 0 0 1 1.547.618L5.063 5.5h5.873l-1.21-3.024a.834.834 0 0 1 .464-1.083"/></svg>';
 
-function card(p, showAvailability = true, showPromoTag = true) {
+/* Карточка покупателя: НИКАКИХ подписей уровней, только коронка у 1 класса + интерактивная кнопка корзины */
+function buyerCard(p) {
   const found = unitsFor(p);
   const liked = state.favorites.has(p.id);
   const unit = (state.page === 'nearby' || state.only) ? found[0] : null;
@@ -433,18 +515,17 @@ function card(p, showAvailability = true, showPromoTag = true) {
   const href = routeURL('product', { product: p.id, size, offer, unit: unit?.id || '' });
   const target = `href="${href}" data-action="product" data-id="${p.id}" data-size="${size}" data-offer="${offer}" data-unit="${unit?.id || ''}"`;
   const pct = discountPct(p);
-  const tier = p.promoTier || 0;
-  const tierMeta = PROMO_TIERS[tier];
+  const inCart = cartItemForProduct(p.id);
+  const isPremiumCrown = (p.promoTier || 0) === 1;
 
-  return `<article class="oz-card ${tier ? 'is-tier-' + tier : ''}">
+  return `<article class="oz-card">
     <div class="oz-card-visual">
       <a ${target} aria-label="Открыть ${clean(p.name)}">
-        <img src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="${clean(p.name)}" loading="lazy">
+        <img src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="${clean(p.name)}" loading="lazy">
       </a>
       <button type="button" class="oz-fav-btn" data-action="favorite" data-id="${p.id}" aria-pressed="${liked}" aria-label="В избранное">${svgHeart}</button>
-      ${showPromoTag && tier > 0 ? `<div class="oz-card-badges-top"><span class="oz-pill ${tierMeta.colorClass}">${tier === 1 ? '👑 ' : tier === 2 ? '⚡ ' : ''}${tierMeta.badge}</span></div>` : ''}
       <div class="oz-card-badges-bottom">
-        ${showAvailability && found.length ? '<span class="oz-pill local">Сегодня в ПВЗ</span>' : pct >= 70 ? '<span class="oz-pill wow">✦ Вау-цены</span>' : ''}
+        ${found.length ? '<span class="oz-pill local">Сегодня в ПВЗ</span>' : pct >= 60 ? '<span class="oz-pill wow">✦ Вау-цены</span>' : ''}
       </div>
     </div>
     <div class="oz-card-body">
@@ -452,20 +533,75 @@ function card(p, showAvailability = true, showPromoTag = true) {
         <span class="oz-price ${pct ? '' : 'regular'}">${rub(p.price)}</span>
         ${pct ? `<span class="oz-old-price">${rub(p.oldPrice)}</span><span class="oz-discount">−${pct}%</span>` : ''}
       </div>
-      ${p.left && p.left <= 20 ? `<div class="oz-stock-left">${p.left} ед. осталось</div>` : ''}
+      ${p.left && p.left <= 15 ? `<div class="oz-stock-left">${p.left} ед. осталось</div>` : ''}
       ${p.verified ? `<div class="oz-verified">${svgCheck}<span>Бренд проверен</span></div>` : ''}
       <a class="oz-card-title" ${target}>${clean(p.name)}</a>
       <div class="oz-rating-row">
         <span class="oz-rating-star">★ <b>${p.rating.toLocaleString('ru-RU')}</b></span>
         <span>•</span>
-        <span>${currency.format(p.reviews || 120)} отзывов</span>
+        <span>${currency.format(p.reviews)} отзывов</span>
       </div>
       <div class="oz-card-cta-wrap">
-        <a class="oz-card-cta ${showAvailability && found.length ? 'is-today' : ''}" ${target}>
-          ${svgBag}
-          <span>${showAvailability && found.length ? 'Сегодня' : 'Завтра'}</span>
-        </a>
-        ${tier === 1 ? `<span class="oz-crown-chip" title="Продвижение 1 класс">${svgCrown}</span>` : tier === 2 ? `<span class="oz-crown-chip is-tier2" title="Продвижение 2 класс">⚡</span>` : ''}
+        ${inCart ? `
+          <div class="oz-incart-row">
+            <button type="button" class="oz-incart-go" data-action="cart">В корзине</button>
+            <div class="oz-qty-stepper">
+              <button type="button" class="oz-qty-btn" data-action="qtyDelta" data-id="${inCart.key}" data-delta="-1" aria-label="Уменьшить">−</button>
+              <span class="oz-qty-val">${inCart.qty || 1}</span>
+              <button type="button" class="oz-qty-btn" data-action="qtyDelta" data-id="${inCart.key}" data-delta="1" aria-label="Увеличить">+</button>
+            </div>
+          </div>
+        ` : `
+          <button type="button" class="oz-card-cta" data-action="quickAdd" data-id="${p.id}" data-size="${size}">
+            ${svgBag}
+            <span>${found.length ? 'Сегодня' : 'Завтра'}</span>
+          </button>
+        `}
+        ${isPremiumCrown ? `<div class="oz-corner-crown" title="Премиум-продавец"><span>${svgCrownSmall}</span></div>` : ''}
+      </div>
+    </div>
+  </article>`;
+}
+
+/* Карточка в «Живой выдаче» Селлера: явные позиции, баллы релевантности, классы и быстрый буст */
+function inspectorCard(p, position, relScore) {
+  const tier = p.promoTier || 0;
+  const tierMeta = PROMO_TIERS[tier];
+  const pct = discountPct(p);
+  const nextTier = tier === 1 ? 0 : tier === 2 ? 1 : tier === 3 ? 2 : 3;
+  const nextMeta = PROMO_TIERS[nextTier];
+
+  return `<article class="oz-card ${tier ? 'inspector-tier-' + tier : ''}">
+    <div class="oz-card-visual">
+      <img src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="${clean(p.name)}" loading="lazy">
+      <div class="oz-card-badges-top">
+        <span class="oz-pill pos">#${position} в выдаче</span>
+        <span class="oz-pill ${tierMeta.colorClass}">${tier === 1 ? '👑 ' : tier === 2 ? '⚡ ' : ''}${tierMeta.badge}</span>
+      </div>
+      <div class="oz-card-badges-bottom">
+        <span class="oz-pill" style="background:rgba(255,255,255,0.92);color:#001a34">${categories[p.category]}</span>
+      </div>
+    </div>
+    <div class="oz-card-body">
+      <div class="oz-price-row">
+        <span class="oz-price ${pct ? '' : 'regular'}">${rub(p.price)}</span>
+        ${pct ? `<span class="oz-discount">−${pct}%</span>` : ''}
+      </div>
+      <div class="oz-card-title" style="font-weight:600">${clean(p.name)}</div>
+      <div class="inspector-meta-strip">
+        <span>Релев.: <strong>${relScore}</strong></span>
+        <span>Рейтинг: <strong>★ ${p.rating}</strong></span>
+      </div>
+      <div class="oz-card-cta-wrap" style="display:flex;gap:6px">
+        ${tier !== 1 ? `
+          <button type="button" class="oz-card-cta" style="height:36px;font-size:12.5px" data-action="buyTier" data-id="${p.id}" data-tier="${nextTier}">
+            ↑ ${nextMeta.code} (${rub(nextMeta.price)})
+          </button>
+        ` : `
+          <button type="button" class="oz-card-cta" style="height:36px;font-size:12.5px;background:var(--tier1-grad)" data-action="buyTier" data-id="${p.id}" data-tier="0">
+            👑 Максимум · Снять
+          </button>
+        `}
       </div>
     </div>
   </article>`;
@@ -476,37 +612,47 @@ function card(p, showAvailability = true, showPromoTag = true) {
    ========================================================= */
 function storefront() {
   const ranked = rankProducts(products, '', 'relevance').map(x => x.p);
+  const jeansCount = products.filter(p => p.category === 'jeans').length;
+  const hoodiesCount = products.filter(p => p.category === 'hoodies').length;
+
   return `
     <section class="oz-hero">
       <div>
-        <span class="oz-hero-tag">✦ Новая коллекция · Осень–Зима</span>
-        <h1>Своя посадка.<br>Свой деним на Ozon.</h1>
-        <p>Выбирайте джинсы с доставкой завтра или забирайте сегодня в ближайшем пункте выдачи.</p>
+        <span class="oz-hero-tag">✦ Новая коллекция · Деним и трикотаж</span>
+        <h1>Джинсы и толстовки<br>на каждый день.</h1>
+        <p>Доставка завтра или примерка сегодня в ближайшем ПВЗ. Добавляйте в корзину в один клик или оформляйте сразу.</p>
         <div class="oz-hero-actions">
-          <a href="#/search?category=clothes" class="oz-hero-btn" data-action="category" data-id="clothes">Смотреть каталог</a>
-          <a href="#/seller" class="oz-hero-btn-alt" data-action="seller">Кабинет селлера · 3 уровня продвижения</a>
+          <a href="#/search?category=jeans" class="oz-hero-btn" data-action="category" data-id="jeans">Джинсы (${jeansCount})</a>
+          <a href="#/search?category=hoodies" class="oz-hero-btn-alt" data-action="category" data-id="hoodies">Толстовки и худи (${hoodiesCount})</a>
         </div>
       </div>
       <div class="oz-hero-photos">
-        <img src="${imageUrls.washed}" alt="Джинсы широкие">
-        <img src="${imageUrls.denim}" alt="Джинсы с высокой посадкой">
-        <img src="${imageUrls.straight}" alt="Джинсы прямые">
+        <img src="${imageUrls.washed}" alt="Джинсы">
+        <img src="${imageUrls.h_veneziani}" ${imgFallbackAttr({ id: 'h_veneziani' })} alt="Толстовка">
+        <img src="${imageUrls.h_milk}" ${imgFallbackAttr({ id: 'h_milk' })} alt="Худи">
       </div>
     </section>
 
-    <div class="oz-season-strip">
-      <div>
-        <strong>Товары рядом в ПВЗ · Примерка сегодня</strong><br>
-        <span>${points[state.point]} — вещи уже ждут на полке без ожидания доставки</span>
-      </div>
-      <a href="#/nearby" class="oz-hero-btn" data-action="nearby">Открыть «Товары рядом»</a>
-    </div>
+    <section class="oz-cat-cards">
+      <a href="#/search?category=jeans" class="oz-cat-banner" data-action="category" data-id="jeans">
+        <div><strong>Джинсы</strong><span>${jeansCount} моделей · багги, прямые, утеплённые</span></div>
+        <span class="oz-cat-emoji">👖</span>
+      </a>
+      <a href="#/search?category=hoodies" class="oz-cat-banner" data-action="category" data-id="hoodies">
+        <div><strong>Толстовки и худи</strong><span>${hoodiesCount} моделей · оверсайз, флис, зип-худи</span></div>
+        <span class="oz-cat-emoji">🧥</span>
+      </a>
+      <a href="#/nearby" class="oz-cat-banner" data-action="nearby">
+        <div><strong>Товары рядом в ПВЗ</strong><span>Примерка сегодня на ${points[state.point]}</span></div>
+        <span class="oz-cat-emoji">📍</span>
+      </a>
+    </section>
 
     <div class="section-head">
       <h2>Рекомендуем для вас</h2>
-      <a href="#/search" class="linkbtn" data-action="category" data-id="">Смотреть все (${products.length}) →</a>
+      <a href="#/search" class="linkbtn" data-action="category" data-id="">Смотреть весь каталог (${products.length}) →</a>
     </div>
-    <section class="grid home-grid">${ranked.map(p => card(p, true, true)).join('')}</section>
+    <section class="grid home-grid">${ranked.map(buyerCard).join('')}</section>
   `;
 }
 
@@ -515,10 +661,9 @@ function catalog() {
   const maxP = state.priceMax !== '' ? Number(state.priceMax) : null;
 
   const filtered = products.filter(p => {
-    if (state.category && (p.category || 'clothes') !== state.category) return false;
+    if (state.category && p.category !== state.category) return false;
     if (state.only && !unitsFor(p).length) return false;
     if (state.verifiedOnly && !p.verified) return false;
-    if (state.tierFilter !== 'all' && String(p.promoTier || 0) !== state.tierFilter) return false;
     if (minP !== null && !Number.isNaN(minP) && p.price < minP) return false;
     if (maxP !== null && !Number.isNaN(maxP) && p.price > maxP) return false;
     return true;
@@ -539,10 +684,9 @@ function catalog() {
         <div class="oz-filter-group">
           <h3>Категория</h3>
           <div class="oz-cat-list">
-            <a href="#/search" class="linkbtn" data-action="category" data-id="">‹ Все категории</a>
-            <div class="oz-cat-current">Одежда</div>
-            <span class="oz-cat-sub">Мужская одежда</span>
-            <span class="oz-cat-sub">Джинсы</span>
+            <a href="#/search" class="oz-cat-link ${!state.category ? 'is-active' : ''}" data-action="category" data-id="">Все товары (${products.length})</a>
+            <a href="#/search?category=jeans" class="oz-cat-link ${state.category === 'jeans' ? 'is-active' : ''}" data-action="category" data-id="jeans">Джинсы (${products.filter(p => p.category === 'jeans').length})</a>
+            <a href="#/search?category=hoodies" class="oz-cat-link ${state.category === 'hoodies' ? 'is-active' : ''}" data-action="category" data-id="hoodies">Толстовки и худи (${products.filter(p => p.category === 'hoodies').length})</a>
           </div>
         </div>
 
@@ -570,17 +714,6 @@ function catalog() {
         </div>
 
         <div class="oz-filter-group">
-          <h3>Продвижение</h3>
-          <select id="tierFilter" class="oz-select">
-            <option value="all" ${state.tierFilter === 'all' ? 'selected' : ''}>Все уровни</option>
-            <option value="1" ${state.tierFilter === '1' ? 'selected' : ''}>1 класс (Премиум)</option>
-            <option value="2" ${state.tierFilter === '2' ? 'selected' : ''}>2 класс (Бизнес)</option>
-            <option value="3" ${state.tierFilter === '3' ? 'selected' : ''}>3 класс (Старт)</option>
-            <option value="0" ${state.tierFilter === '0' ? 'selected' : ''}>Без продвижения</option>
-          </select>
-        </div>
-
-        <div class="oz-filter-group">
           <label class="oz-switch-row">
             <span>Бренд проверен<small>Оригинальный товар</small></span>
             <input id="verifiedOnly" type="checkbox" ${state.verifiedOnly ? 'checked' : ''}>
@@ -592,39 +725,22 @@ function catalog() {
 
       <section>
         <div class="oz-sort-bar">
-          <div class="oz-sort-left">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <select id="sort" class="oz-sort-select" aria-label="Сортировка">
               ${[
-                ['relevance', 'По релевантности и классу'],
-                ['popular', 'Популярные'],
+                ['relevance', 'Популярные'],
                 ['cheap', 'Сначала дешёвые'],
                 ['dear', 'Сначала дорогие'],
                 ['new', 'Новинки'],
               ].map(([k, v]) => `<option value="${k}" ${state.sort === k ? 'selected' : ''}>${v}</option>`).join('')}
             </select>
-            <span class="muted small">Найдено: <strong>${ranked.length}</strong></span>
-          </div>
-          <a href="#/seller" class="btn" data-action="seller">Управлять продвижением →</a>
-        </div>
-
-        <div class="oz-rank-banner">
-          <div class="oz-rank-chain">
-            <strong>Алгоритм выдачи:</strong>
-            <span class="oz-pill" style="background:#eef4ff;color:#005bff">Релевантность</span>
-            <span class="oz-rank-arrow">›</span>
-            <span class="oz-pill tier-1">1 класс</span>
-            <span class="oz-rank-arrow">›</span>
-            <span class="oz-pill tier-2">2 класс</span>
-            <span class="oz-rank-arrow">›</span>
-            <span class="oz-pill tier-3">3 класс</span>
-            <span class="oz-rank-arrow">›</span>
-            <span class="oz-pill tier-0">Без продвижения</span>
+            <span class="muted small">Найдено товаров: <strong>${ranked.length}</strong></span>
           </div>
         </div>
 
         ${ranked.length
-          ? `<div class="grid">${ranked.map(({ p }) => card(p, true, true)).join('')}</div>`
-          : `<div class="empty-box"><h3>Ничего не нашлось</h3><p class="muted">Попробуйте ослабить фильтры или изменить поисковый запрос.</p><button type="button" class="btn primary" data-action="resetFilter">Сбросить фильтры</button></div>`}
+          ? `<div class="grid">${ranked.map(({ p }) => buyerCard(p)).join('')}</div>`
+          : `<div class="empty-box"><h3>Ничего не нашлось</h3><p class="muted">Попробуйте изменить запрос или сбросить фильтры.</p><button type="button" class="btn primary" data-action="resetFilter">Сбросить фильтры</button></div>`}
       </section>
     </div>
   `;
@@ -636,7 +752,7 @@ function nearby() {
     <div class="section-head">
       <div>
         <h1>Товары рядом</h1>
-        <p class="muted" style="margin:4px 0 0">Уже в выбранном пункте выдачи. Можно примерить и забрать сегодня.</p>
+        <p class="muted" style="margin:4px 0 0">Уже в выбранном пункте выдачи — можно примерить и забрать сегодня.</p>
       </div>
       <div style="min-width:260px">
         <select id="point" class="oz-select">
@@ -645,8 +761,8 @@ function nearby() {
       </div>
     </div>
     ${items.length
-      ? `<section class="grid home-grid">${items.map(p => card(p, true, true)).join('')}</section>`
-      : `<div class="empty-box">В этом пункте пока нет свободных товаров. Выберите другой ПВЗ.</div>`}
+      ? `<section class="grid home-grid">${items.map(buyerCard).join('')}</section>`
+      : `<div class="empty-box">В этом ПВЗ пока нет свободных товаров. Выберите другой пункт.</div>`}
   `;
 }
 
@@ -657,7 +773,7 @@ function selectedProductOffer(p) {
     return { kind: 'local', unit, price: unit.price, seller: p.seller, delivery: 'Забрать сегодня', note: 'Уже в выбранном пункте выдачи' };
   }
   if (state.offer === 'cheap') {
-    return { kind: 'cheap', price: p.cheap, seller: 'Мир денима', delivery: 'Доставим через 3 дня', note: 'Со склада в пункт выдачи' };
+    return { kind: 'cheap', price: p.cheap, seller: 'Мир одежды', delivery: 'Доставим через 3 дня', note: 'Со склада в пункт выдачи' };
   }
   return { kind: 'fast', price: p.price, seller: p.seller, delivery: 'Доставим завтра', note: 'Со склада Ozon в пункт выдачи' };
 }
@@ -672,14 +788,13 @@ function getProductOffers(p) {
   const warehouse = (item, kind) => ({
     key: `${item.id}-${state.size}-${state.point}-${kind}`, product: item.id, size: state.size,
     kind, unit: '', price: kind === 'cheap' ? item.cheap : item.price,
-    seller: kind === 'cheap' ? 'Мир денима' : item.seller, point: state.point,
+    seller: kind === 'cheap' ? 'Мир одежды' : item.seller, point: state.point,
     delivery: kind === 'cheap' ? 'Через 3 дня' : 'Завтра',
     slot: kind === 'cheap' ? 'Доставка через 3 дня' : 'Доставка завтра', speed: kind === 'cheap' ? 2 : 1,
   });
   const similar = rankProducts(
     products.filter(item => item.id !== p.id && item.category === p.category && item.sizes.includes(state.size)),
-    '',
-    'relevance'
+    '', 'relevance'
   ).slice(0, 3).map(x => x.p);
   return [...local, warehouse(p, 'fast'), warehouse(p, 'cheap'), ...similar.map(item => warehouse(item, 'fast'))];
 }
@@ -697,7 +812,7 @@ function offerMiniCard(item) {
   const href = routeURL('product', { product: item.product, size: item.size, offer: item.kind, unit: item.unit });
   return `<article class="offer-mini-card">
     <a href="${href}" data-action="product" data-id="${p.id}" data-offer="${item.kind}" data-unit="${item.unit}" data-size="${item.size}">
-      <img src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="${clean(p.name)}">
+      <img src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="${clean(p.name)}">
       <strong>${rub(item.price)}</strong>
       <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${clean(p.name)}</div>
       <div class="muted">${item.delivery} · ${item.size}</div>
@@ -712,32 +827,29 @@ function productPage() {
   const liked = state.favorites.has(p.id);
   const pct = discountPct(p);
   const ozonCardPrice = Math.round(offer.price * 0.92);
-  const tierMeta = PROMO_TIERS[p.promoTier || 0];
   const offersList = visibleProductOffers(p);
+  const inCart = cartItemForProduct(p.id, state.size);
 
   return `
     <div class="pdp-top">
       <div class="oz-breadcrumbs" style="margin:0">
         <a href="#/search" class="linkbtn" data-action="backListing">← Назад</a>
         <span>•</span>
-        <span>${categories[p.category || 'clothes']}</span>
+        <a href="#/search?category=${p.category}" class="linkbtn" data-action="category" data-id="${p.category}">${categories[p.category]}</a>
         <span>•</span>
         <span>${clean(p.seller)}</span>
       </div>
-      <div class="pdp-actions-inline">
-        <span>Артикул: <strong>${p.sku}</strong></span>
-        ${p.promoTier ? `<span class="oz-pill ${tierMeta.colorClass}">${tierMeta.badge}</span>` : ''}
-      </div>
+      <div class="muted small">Артикул: <strong>${p.sku}</strong></div>
     </div>
 
     <section class="pdp-layout">
       <div class="pdp-gallery">
         <div class="pdp-gallery-main">
-          <img src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="${clean(p.name)}">
+          <img src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="${clean(p.name)}">
         </div>
         <div class="pdp-labels">
-          <span class="pdp-label">Постоплата при получении</span>
-          ${p.verified ? `<span class="pdp-label is-green">${svgCheck} Товар проверен</span>` : ''}
+          <span class="pdp-label">Примерка и оплата при получении</span>
+          ${p.verified ? `<span class="pdp-label is-green">${svgCheck} Бренд проверен</span>` : ''}
           ${offer.kind === 'local' ? '<span class="pdp-label is-green">Уже в ПВЗ сегодня</span>' : ''}
         </div>
       </div>
@@ -746,7 +858,7 @@ function productPage() {
         <h1>${clean(p.name)}</h1>
         <div class="pdp-meta">
           <span class="oz-rating-star">★ <b>${p.rating.toLocaleString('ru-RU')}</b></span>
-          <span>${currency.format(p.reviews || 120)} отзывов</span>
+          <span>${currency.format(p.reviews)} отзывов</span>
           <span>•</span>
           <span>Цвет: ${clean(p.color)}</span>
         </div>
@@ -756,14 +868,13 @@ function productPage() {
           ${p.sizes.map(sz => `<button type="button" class="size-btn" data-action="size" data-id="${sz}" aria-pressed="${state.size === sz}">${sz}</button>`).join('')}
         </div>
 
-        <div class="pdp-section-title">О товаре</div>
+        <div class="pdp-section-title">Характеристики</div>
         <dl class="pdp-specs">
-          <div><dt>Тип</dt><dd>Джинсы</dd></div>
+          <div><dt>Категория</dt><dd>${categories[p.category]}</dd></div>
           <div><dt>Цвет</dt><dd>${clean(p.color)}</dd></div>
           <div><dt>Выбранный размер</dt><dd>${state.size}</dd></div>
-          <div><dt>Состав</dt><dd>Хлопок 98%, эластан 2%</dd></div>
+          <div><dt>Состав</dt><dd>${p.category === 'hoodies' ? 'Хлопок 80%, полиэстер 20%' : 'Хлопок 98%, эластан 2%'}</dd></div>
           <div><dt>Продавец</dt><dd>${clean(p.seller)}</dd></div>
-          <div><dt>Уровень продвижения</dt><dd><span class="oz-pill ${tierMeta.colorClass}">${tierMeta.code}</span></dd></div>
         </dl>
       </div>
 
@@ -772,22 +883,48 @@ function productPage() {
           <div class="oz-bank-price-box">
             <div>
               <div class="oz-bank-price">${rub(ozonCardPrice)}</div>
-              <div class="oz-bank-caption">С картой Ozon Банка</div>
+              <div class="oz-bank-caption">С Ozon Картой</div>
             </div>
             ${pct ? `<span class="oz-pill" style="background:var(--oz-magenta);color:#fff">−${pct}%</span>` : ''}
           </div>
           <div class="oz-regular-price-row">
             <strong>${rub(offer.price)}</strong>
             ${pct ? `<span class="oz-old-price">${rub(p.oldPrice)}</span>` : ''}
-            <span class="muted small">с другими банками</span>
+            <span class="muted small">без карты</span>
           </div>
 
-          <div class="pdp-buy-row">
-            ${offer.kind === 'local'
-              ? `<button type="button" class="pdp-buy-btn" data-action="addLocal" data-id="${offer.unit.id}"><span>В корзину</span><small>${offer.delivery}</small></button>`
-              : `<button type="button" class="pdp-buy-btn" data-action="addRemote" data-id="${offer.kind}"><span>В корзину</span><small>${offer.delivery}</small></button>`}
-            <button type="button" class="pdp-fav-square" data-action="favorite" data-id="${p.id}" aria-pressed="${liked}" aria-label="В избранное">${svgHeart}</button>
+          <div class="pdp-cart-stack">
+            <div class="pdp-buy-row">
+              ${inCart ? `
+                <div class="pdp-incart-box">
+                  <button type="button" class="pdp-incart-link" data-action="cart">
+                    <span>В корзине</span>
+                    <small>Перейти</small>
+                  </button>
+                  <div class="pdp-qty-stepper">
+                    <button type="button" class="oz-qty-btn" data-action="qtyDelta" data-id="${inCart.key}" data-delta="-1" aria-label="Уменьшить">−</button>
+                    <span class="oz-qty-val">${inCart.qty || 1}</span>
+                    <button type="button" class="oz-qty-btn" data-action="qtyDelta" data-id="${inCart.key}" data-delta="1" aria-label="Увеличить">+</button>
+                  </div>
+                </div>
+              ` : offer.kind === 'local' ? `
+                <button type="button" class="pdp-buy-btn" data-action="addLocal" data-id="${offer.unit.id}">
+                  <span>Добавить в корзину</span>
+                  <small>${offer.delivery}</small>
+                </button>
+              ` : `
+                <button type="button" class="pdp-buy-btn" data-action="addRemote" data-id="${offer.kind}">
+                  <span>Добавить в корзину</span>
+                  <small>${offer.delivery}</small>
+                </button>
+              `}
+              <button type="button" class="pdp-fav-square" data-action="favorite" data-id="${p.id}" aria-pressed="${liked}" aria-label="В избранное">${svgHeart}</button>
+            </div>
+            <button type="button" class="pdp-buy-now-btn" data-action="buyNow" data-id="${p.id}">
+              Купить сейчас · ${rub(offer.price)}
+            </button>
           </div>
+
           <div class="muted small">${offer.note} · ${points[state.point]}</div>
         </div>
 
@@ -805,17 +942,16 @@ function productPage() {
         </div>
 
         <div class="oz-seller-mini">
-          <div class="oz-seller-mini-left">
+          <div style="display:flex;align-items:center;gap:12px">
             <div class="oz-seller-avatar">${clean(p.seller[0] || 'D')}</div>
             <div>
               <div style="display:flex;align-items:center;gap:6px;font-weight:700">
                 <span>${clean(p.seller)}</span>
-                ${p.promoTier === 1 ? `<span style="color:var(--oz-magenta)" title="1 класс">${svgCrown}</span>` : ''}
+                ${p.promoTier === 1 ? `<span style="color:var(--oz-marketing)" title="Премиум-продавец">${svgCrownSmall}</span>` : ''}
               </div>
               <div class="muted small">★ ${p.rating} · 15 дней на возврат</div>
             </div>
           </div>
-          <a href="#/seller" class="btn subtle" style="padding:8px 12px;font-size:12.5px" data-action="seller">Кабинет</a>
         </div>
       </aside>
     </section>
@@ -833,7 +969,6 @@ function offersModal() {
           <h2>Другие предложения</h2>
           <button type="button" class="close-btn" data-action="backProduct" aria-label="Закрыть">×</button>
         </div>
-        <p class="muted small" style="margin-top:0">${clean(p.name)} и похожие товары в категории</p>
         <div class="offer-tabs">
           ${offerTabs.map(([k, l]) => `<button type="button" class="offer-tab" data-action="tab" data-id="${k}" aria-pressed="${state.tab === k}">${l}</button>`).join('')}
         </div>
@@ -851,72 +986,82 @@ function offersModal() {
 }
 
 /* =========================================================
-   КАБИНЕТ СЕЛЛЕРА И 3 УРОВНЯ ПРОДВИЖЕНИЯ
+   РЕЖИМ ПРОДАВЦА (OZON SELLER):
+   1) Продвижение  2) Живая выдача  3) Аналитика  4) Мои товары
    ========================================================= */
-function sellerPage() {
-  const promotedCount = products.filter(p => (p.promoTier || 0) > 0).length;
-  const tier1Count = products.filter(p => p.promoTier === 1).length;
-  const estViews = products.reduce((sum, p) => sum + ({ 1: 4200, 2: 2300, 3: 1450, 0: 950 }[p.promoTier || 0]), 0);
+function simulatePosition(targetId, hypotheticalTier, categoryScope = '') {
+  const copy = products
+    .filter(p => !categoryScope || p.category === categoryScope)
+    .map(p => (p.id === targetId ? { ...p, promoTier: hypotheticalTier } : p));
+  const ranked = rankProducts(copy, '', 'relevance');
+  const idx = ranked.findIndex(x => x.p.id === targetId);
+  return idx >= 0 ? idx + 1 : copy.length;
+}
+
+function productEconomics(p) {
+  const tier = p.promoTier || 0;
+  const meta = PROMO_TIERS[tier];
+  const baseViews = 420 + Math.round((p.rating - 4.5) * 300) + Math.min(350, Math.round(p.reviews / 12));
+  const views = Math.round(baseViews * meta.viewsMult);
+  const clicks = Math.round(views * meta.ctr);
+  const orders = Math.max(1, Math.round(clicks * meta.cr));
+  const revenue = orders * p.price;
+  const cost = meta.price;
+  const drr = revenue > 0 ? ((cost / revenue) * 100) : 0;
+  const margin = Math.round(revenue * 0.28) - cost;
+  return { views, clicks, orders, revenue, cost, drr, margin };
+}
+
+function sellerPromoView() {
   const selectedProd = productById(state.sellerSelectedProduct) || products[0];
+  const curCatPos = simulatePosition(selectedProd.id, selectedProd.promoTier || 0, selectedProd.category);
+  const curAllPos = simulatePosition(selectedProd.id, selectedProd.promoTier || 0, '');
 
-  // Позиции в выдаче по запросу «джинсы»
-  const currentRanking = rankProducts(products, 'джинсы', 'relevance');
-  const posMap = new Map(currentRanking.map((item, idx) => [item.p.id, idx + 1]));
+  const visibleRows = products.filter(p => state.sellerCatFilter === 'all' || p.category === state.sellerCatFilter);
+  const allRankMap = new Map(rankProducts(products, '', 'relevance').map((x, i) => [x.p.id, i + 1]));
 
-  const promoTabView = () => `
-    <div class="rank-ladder">
-      <div class="rank-ladder-head">
-        <h2>Как работает приоритет в поиске Ozon</h2>
-        <a href="#/search?text=${encodeURIComponent('джинсы')}" class="linkbtn" data-action="openSearch" data-id="джинсы">Проверить в живой выдаче →</a>
-      </div>
-      <div class="rank-steps">
-        <div class="rank-step step-rel">
-          <div class="rank-step-num">Шаг 1 · База</div>
-          <strong>Релевантность</strong>
-          <small>Точность совпадения с запросом</small>
-        </div>
-        <div class="rank-step step-t1">
-          <div class="rank-step-num">Уровень 1 · Максимум</div>
-          <strong>👑 Первый класс</strong>
-          <small>Топ-позиции и корона</small>
-        </div>
-        <div class="rank-step step-t2">
-          <div class="rank-step-num">Уровень 2 · Ускорение</div>
-          <strong>⚡ 2 класс</strong>
-          <small>Выше 3 класса и органики</small>
-        </div>
-        <div class="rank-step step-t3">
-          <div class="rank-step-num">Уровень 3 · Базовый</div>
-          <strong>🚀 3 класс</strong>
-          <small>Выше обычной выдачи</small>
-        </div>
-        <div class="rank-step">
-          <div class="rank-step-num">Органика</div>
-          <strong>Без продвижения</strong>
-          <small>Сортировка по рейтингу</small>
-        </div>
-      </div>
-    </div>
-
-    <div class="block" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+  return `
+    <section class="target-picker-card">
+      <img class="target-picker-thumb" src="${imgFor(selectedProd)}" ${imgFallbackAttr(selectedProd)} alt="">
       <div>
-        <div class="muted small">Товар для быстрого подключения тарифа</div>
-        <strong style="font-size:16px">${clean(selectedProd.name)}</strong>
-        <span class="oz-pill ${PROMO_TIERS[selectedProd.promoTier || 0].colorClass}" style="margin-left:8px">${PROMO_TIERS[selectedProd.promoTier || 0].code}</span>
-        <span class="muted small" style="margin-left:8px">Текущее место по «джинсы»: <strong>#${posMap.get(selectedProd.id)}</strong></span>
+        <span class="target-picker-step">Шаг 1 · Выбор товара для тарифа</span>
+        <div style="font-size:19px;font-weight:800;line-height:1.25">${clean(selectedProd.name)}</div>
+        <div class="target-picker-meta">
+          <span class="oz-pill ${PROMO_TIERS[selectedProd.promoTier || 0].colorClass}">${PROMO_TIERS[selectedProd.promoTier || 0].code}</span>
+          <span>Категория: <strong>${categories[selectedProd.category]}</strong></span>
+          <span>•</span>
+          <span>Цена: <strong>${rub(selectedProd.price)}</strong></span>
+          <span>•</span>
+          <span>Место в категории: <strong>#${curCatPos}</strong> (в общем: #${curAllPos})</span>
+        </div>
       </div>
-      <select id="sellerTargetProduct" class="oz-select" style="width:auto;min-width:260px">
-        ${products.map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} (${PROMO_TIERS[p.promoTier || 0].code})</option>`).join('')}
-      </select>
-    </div>
+      <div class="target-select-wrap">
+        <label class="target-select-label" for="sellerTargetProduct">Выберите товар, чтобы подключить 1, 2 или 3 класс ниже:</label>
+        <div class="target-select-box">
+          <select id="sellerTargetProduct" class="target-select-fancy">
+            <optgroup label="👖 Джинсы">
+              ${products.filter(p => p.category === 'jeans').map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} — ${PROMO_TIERS[p.promoTier || 0].code}</option>`).join('')}
+            </optgroup>
+            <optgroup label="🧥 Толстовки и худи">
+              ${products.filter(p => p.category === 'hoodies').map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} — ${PROMO_TIERS[p.promoTier || 0].code}</option>`).join('')}
+            </optgroup>
+          </select>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px">
+          <span class="muted">3 карточки тарифов ниже применятся к этому SKU</span>
+          <button type="button" class="linkbtn small" data-action="openLiveFor" data-id="${selectedProd.category}">Проверить в живой выдаче →</button>
+        </div>
+      </div>
+    </section>
 
     <div class="tiers-grid">
       ${[3, 2, 1].map(t => {
         const meta = PROMO_TIERS[t];
         const isCurrent = (selectedProd.promoTier || 0) === t;
+        const projPos = simulatePosition(selectedProd.id, t, selectedProd.category);
         return `<article class="tier-card level-${t}">
           <div class="tier-head">
-            <span class="tier-level-tag">${t === 1 ? '👑 ' : t === 2 ? '⚡ ' : '🚀 '}Уровень ${t === 1 ? '3 / MAX' : t === 2 ? '2 / PRO' : '1 / START'} · ${meta.code}</span>
+            <span class="tier-level-tag">${t === 1 ? '👑 ' : t === 2 ? '⚡ ' : '🚀 '}${meta.code}</span>
             <span class="tier-stars">${meta.stars}</span>
           </div>
           <div>
@@ -924,8 +1069,14 @@ function sellerPage() {
             <p class="muted small" style="margin:4px 0 0">${meta.subtitle}</p>
           </div>
           <div class="tier-price">${rub(meta.price)} <small>/ 7 дней</small></div>
+          <div class="tier-forecast-pill">
+            <span>Прогноз в «${categories[selectedProd.category]}»:</span>
+            <strong>#${curCatPos} → #${projPos}</strong>
+          </div>
           <div>
-            <div class="tier-power-label"><span>Сила буста в выдаче</span><strong>${meta.boostLabel}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--oz-text-secondary);margin-bottom:5px">
+              <span>Сила буста</span><strong>${meta.boostLabel}</strong>
+            </div>
             <div class="tier-bar"><div class="tier-bar-fill"></div></div>
           </div>
           <ul class="tier-perks">
@@ -933,7 +1084,7 @@ function sellerPage() {
           </ul>
           <div class="tier-card-footer">
             <button type="button" class="tier-buy-btn" data-action="buyTier" data-id="${selectedProd.id}" data-tier="${t}" ${isCurrent ? 'disabled style="opacity:.65;cursor:default"' : ''}>
-              ${isCurrent ? `✓ Активен для этого товара` : `Купить «${meta.code}» за ${rub(meta.price)}`}
+              ${isCurrent ? `✓ Активен для выбранного товара` : `Подключить ${meta.code} за ${rub(meta.price)}`}
             </button>
           </div>
         </article>`;
@@ -942,210 +1093,403 @@ function sellerPage() {
 
     <div class="seller-table-wrap">
       <div class="section-head" style="margin-top:0">
-        <h2 style="font-size:18px">Управление уровнями по всем товарам</h2>
-        <span class="muted small">Нажмите на уровень — продвижение применится мгновенно</span>
+        <div>
+          <h2 style="font-size:18px">Быстрое управление всеми товарами (${visibleRows.length})</h2>
+          <p class="muted small" style="margin:2px 0 0">Переключайте класс в один клик — изменения сразу видны в «Живой выдаче» и у покупателя</p>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="offer-tab" data-action="sellerCatFilter" data-id="all" aria-pressed="${state.sellerCatFilter === 'all'}">Все (${products.length})</button>
+          <button type="button" class="offer-tab" data-action="sellerCatFilter" data-id="jeans" aria-pressed="${state.sellerCatFilter === 'jeans'}">👖 Джинсы</button>
+          <button type="button" class="offer-tab" data-action="sellerCatFilter" data-id="hoodies" aria-pressed="${state.sellerCatFilter === 'hoodies'}">🧥 Толстовки</button>
+        </div>
       </div>
-      ${products.map(p => {
+      ${visibleRows.map(p => {
         const tier = p.promoTier || 0;
-        const pos = posMap.get(p.id);
+        const pos = allRankMap.get(p.id);
         const fxClass = state.lastUpgraded && state.lastUpgraded.id === p.id ? `just-upgraded-${state.lastUpgraded.tier}` : '';
         return `<div class="seller-product-row ${fxClass}">
-          <img class="seller-thumb" src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="">
+          <img class="seller-thumb" src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="">
           <div>
             <div style="font-weight:700">${clean(p.name)}</div>
-            <div class="muted small">Арт. ${p.sku} · ${clean(p.color)} · Место в выдаче: <strong>#${pos}</strong></div>
+            <div class="muted small">${categories[p.category]} · ${clean(p.color)} · Общая выдача: <strong>#${pos}</strong></div>
           </div>
-          <div>
-            <strong>${rub(p.price)}</strong>
-            <div class="muted small">★ ${p.rating}</div>
-          </div>
-          <div>
-            <span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span>
-          </div>
+          <div><strong>${rub(p.price)}</strong><div class="muted small">★ ${p.rating}</div></div>
+          <div><span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span></div>
           <div class="tier-switcher">
             <button type="button" class="tier-chip-btn ${tier === 0 ? 'active-0' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="0">Без</button>
-            <button type="button" class="tier-chip-btn ${tier === 3 ? 'active-3' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="3">3 класс</button>
-            <button type="button" class="tier-chip-btn ${tier === 2 ? 'active-2' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="2">2 класс</button>
-            <button type="button" class="tier-chip-btn ${tier === 1 ? 'active-1' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="1">👑 1 класс</button>
+            <button type="button" class="tier-chip-btn ${tier === 3 ? 'active-3' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="3">3 кл · 100₽</button>
+            <button type="button" class="tier-chip-btn ${tier === 2 ? 'active-2' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="2">2 кл · 150₽</button>
+            <button type="button" class="tier-chip-btn ${tier === 1 ? 'active-1' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="1">👑 1 кл · 300₽</button>
           </div>
         </div>`;
       }).join('')}
     </div>
   `;
+}
 
-  const productsTabView = () => `
+function sellerLiveView() {
+  const filtered = products.filter(p => {
+    if (state.liveCategory && p.category !== state.liveCategory) return false;
+    if (state.liveTierFilter !== 'all' && String(p.promoTier || 0) !== state.liveTierFilter) return false;
+    return true;
+  });
+  const ranked = rankProducts(filtered, state.liveQuery, 'relevance');
+
+  return `
+    <section class="inspector-bar">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="margin:0;font-size:20px">Инспектор живой выдачи (вид для селлера)</h2>
+          <p class="muted small" style="margin:3px 0 0">Показывает реальные позиции, баллы релевантности и классы продвижения — покупатели эти плашки не видят.</p>
+        </div>
+        <button type="button" class="btn subtle" data-action="setMode" data-id="buyer">Посмотреть глазами покупателя →</button>
+      </div>
+
+      <div class="oz-rank-chain">
+        <strong>Формула выдачи:</strong>
+        <span class="oz-pill" style="background:#eef4ff;color:#005bff">Релевантность запроса</span>
+        <span>›</span>
+        <span class="oz-pill tier-1">👑 1 класс (300 ₽)</span>
+        <span>›</span>
+        <span class="oz-pill tier-2">⚡ 2 класс (150 ₽)</span>
+        <span>›</span>
+        <span class="oz-pill tier-3">🚀 3 класс (100 ₽)</span>
+        <span>›</span>
+        <span class="oz-pill tier-0">Органика</span>
+      </div>
+
+      <div class="inspector-search-row">
+        <input id="liveQuery" class="oz-input" style="max-width:320px" value="${clean(state.liveQuery)}" placeholder="Запрос: толстовка, джинсы, чёрные, оверсайз...">
+        <select id="liveCategory" class="oz-select" style="width:auto;min-width:170px">
+          <option value="" ${!state.liveCategory ? 'selected' : ''}>Все категории</option>
+          <option value="jeans" ${state.liveCategory === 'jeans' ? 'selected' : ''}>👖 Джинсы</option>
+          <option value="hoodies" ${state.liveCategory === 'hoodies' ? 'selected' : ''}>🧥 Толстовки и худи</option>
+        </select>
+        <select id="liveTierFilter" class="oz-select" style="width:auto;min-width:165px">
+          <option value="all" ${state.liveTierFilter === 'all' ? 'selected' : ''}>Все классы</option>
+          <option value="1" ${state.liveTierFilter === '1' ? 'selected' : ''}>1 класс</option>
+          <option value="2" ${state.liveTierFilter === '2' ? 'selected' : ''}>2 класс</option>
+          <option value="3" ${state.liveTierFilter === '3' ? 'selected' : ''}>3 класс</option>
+          <option value="0" ${state.liveTierFilter === '0' ? 'selected' : ''}>Без продвижения</option>
+        </select>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${['', 'толстовка', 'джинсы', 'чёрные', 'утеплённые', 'оверсайз'].map(q => `<button type="button" class="offer-tab" data-action="setLiveQuery" data-id="${q}" aria-pressed="${state.liveQuery === q}">${q || 'Все'}</button>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    ${ranked.length
+      ? `<section class="grid">${ranked.map(({ p, rel }, idx) => inspectorCard(p, idx + 1, rel)).join('')}</section>`
+      : `<div class="empty-box">По этому фильтру товаров не найдено.</div>`}
+  `;
+}
+
+function sellerAnalyticsView() {
+  const rows = products.map(p => ({ p, eco: productEconomics(p) }));
+  const totalViews = rows.reduce((s, r) => s + r.eco.views, 0);
+  const totalOrders = rows.reduce((s, r) => s + r.eco.orders, 0);
+  const totalRev = rows.reduce((s, r) => s + r.eco.revenue, 0);
+  const totalAdCost = rows.reduce((s, r) => s + r.eco.cost, 0);
+  const avgDRR = totalRev > 0 ? ((totalAdCost / totalRev) * 100).toFixed(2) : '0.00';
+
+  // Данные по уровням
+  const byTier = [1, 2, 3, 0].map(t => {
+    const group = rows.filter(r => (r.p.promoTier || 0) === t);
+    return {
+      tier: t,
+      meta: PROMO_TIERS[t],
+      count: group.length,
+      views: group.reduce((s, r) => s + r.eco.views, 0),
+      orders: group.reduce((s, r) => s + r.eco.orders, 0),
+      revenue: group.reduce((s, r) => s + r.eco.revenue, 0),
+      cost: group.reduce((s, r) => s + r.eco.cost, 0),
+    };
+  });
+  const maxTierRev = Math.max(1, ...byTier.map(x => x.revenue));
+
+  // Данные по 7 дням (SVG график)
+  const dayWeights = [0.84, 0.91, 0.96, 1.04, 1.12, 1.08, 1.18];
+  const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const dailyViews = dayWeights.map(w => Math.round((totalViews / 7) * w));
+  const maxDayV = Math.max(1, ...dailyViews);
+  const pts = dailyViews.map((v, i) => {
+    const x = 40 + i * 86;
+    const y = 170 - Math.round((v / maxDayV) * 130);
+    return { x, y, v, label: dayLabels[i] };
+  });
+  const polyPoints = pts.map(pt => `${pt.x},${pt.y}`).join(' ');
+  const areaPoints = `40,180 ${polyPoints} ${pts[pts.length - 1].x},180`;
+
+  // По категориям
+  const catStats = Object.entries(categories).map(([key, title]) => {
+    const grp = rows.filter(r => r.p.category === key);
+    return {
+      key, title,
+      count: grp.length,
+      promoted: grp.filter(r => (r.p.promoTier || 0) > 0).length,
+      revenue: grp.reduce((s, r) => s + r.eco.revenue, 0),
+      orders: grp.reduce((s, r) => s + r.eco.orders, 0),
+    };
+  });
+
+  return `
+    <section class="seller-kpis">
+      <div class="seller-kpi">
+        <small>Прогноз выручки (7 дней)</small>
+        <strong>${rub(totalRev)}</strong>
+        <span class="kpi-sub">${totalOrders} заказов по прогнозу</span>
+      </div>
+      <div class="seller-kpi">
+        <small>Показов карточек (7 дней)</small>
+        <strong>${currency.format(totalViews)}</strong>
+        <span class="kpi-sub">Средний CTR ${(rows.reduce((s, r) => s + r.eco.clicks, 0) / Math.max(1, totalViews) * 100).toFixed(1)}%</span>
+      </div>
+      <div class="seller-kpi">
+        <small>Активный бюджет подписок</small>
+        <strong>${rub(totalAdCost)}</strong>
+        <span class="kpi-sub">Всего вложено: ${rub(state.sellerSpent)}</span>
+      </div>
+      <div class="seller-kpi">
+        <small>ДРР (доля рекламных расходов)</small>
+        <strong>${avgDRR}%</strong>
+        <span class="kpi-sub">${Number(avgDRR) < 3 ? 'Отличная окупаемость' : 'В пределах нормы'}</span>
+      </div>
+    </section>
+
+    <section class="analytics-grid">
+      <div class="chart-card">
+        <h3>Динамика показов за 7 дней</h3>
+        <p class="muted small" style="margin:0 0 12px">Пересчитывается автоматически при покупке 1, 2 или 3 класса</p>
+        <svg viewBox="0 0 600 210" style="width:100%;height:auto;display:block">
+          <defs>
+            <linearGradient id="ozAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#005bff" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="#005bff" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+          <line x1="35" y1="180" x2="575" y2="180" stroke="#e2e8f0" stroke-width="1"/>
+          <line x1="35" y1="115" x2="575" y2="115" stroke="#f1f5f9" stroke-dasharray="4 4"/>
+          <line x1="35" y1="50" x2="575" y2="50" stroke="#f1f5f9" stroke-dasharray="4 4"/>
+          <polygon points="${areaPoints}" fill="url(#ozAreaGrad)"/>
+          <polyline points="${polyPoints}" fill="none" stroke="#005bff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          ${pts.map(pt => `
+            <circle cx="${pt.x}" cy="${pt.y}" r="5.5" fill="#fff" stroke="#005bff" stroke-width="3"/>
+            <text x="${pt.x}" y="${pt.y - 12}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#001a34">${currency.format(pt.v)}</text>
+            <text x="${pt.x}" y="200" text-anchor="middle" font-size="12" fill="#64748b">${pt.label}</text>
+          `).join('')}
+        </svg>
+      </div>
+
+      <div class="chart-card">
+        <h3>Вклад уровней продвижения в выручку</h3>
+        <p class="muted small" style="margin:0">Сравнение эффективности 1, 2, 3 классов и органики</p>
+        <div class="bar-list">
+          ${byTier.map(b => {
+            const pct = Math.round((b.revenue / maxTierRev) * 100);
+            const bg = b.tier === 1 ? 'var(--tier1-grad)' : b.tier === 2 ? 'var(--tier2-grad)' : b.tier === 3 ? 'var(--tier3-grad)' : '#94a3b8';
+            return `<div>
+              <div class="bar-item-head">
+                <span><strong>${b.meta.code}</strong> (${b.count} SKU · ${b.orders} зак.)</span>
+                <strong>${rub(b.revenue)}</strong>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:${Math.max(4, pct)}%;background:${bg}"></div></div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--oz-border);display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${catStats.map(c => `<div style="background:var(--oz-surface-soft);padding:10px 12px;border-radius:12px">
+            <div class="small muted">${c.title}</div>
+            <strong style="font-size:16px">${rub(c.revenue)}</strong>
+            <div class="small" style="color:var(--oz-blue)">${c.promoted} из ${c.count} в бусте · ${c.orders} зак.</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <section class="seller-table-wrap">
+      <div class="section-head" style="margin-top:0">
+        <h2 style="font-size:18px">Юнит-экономика и рекомендации по SKU</h2>
+        <span class="muted small">Сортировка по прогнозу выручки</span>
+      </div>
+      <table class="sku-analytics-table">
+        <thead>
+          <tr>
+            <th>Товар</th>
+            <th>Категория</th>
+            <th>Класс</th>
+            <th>Показы / Клики</th>
+            <th>Заказы</th>
+            <th>Расход / ДРР</th>
+            <th>Прогноз выручки</th>
+            <th>Рекомендация</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.sort((a, b) => b.eco.revenue - a.eco.revenue).map(({ p, eco }) => {
+            const tier = p.promoTier || 0;
+            const rec = tier === 0
+              ? `<button type="button" class="btn" style="padding:5px 10px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="3">Поднять в 3 кл · 100₽</button>`
+              : tier > 1 && p.rating >= 4.9
+                ? `<button type="button" class="btn primary" style="padding:5px 10px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="1">В 1 класс · 300₽</button>`
+                : '<span class="roi-good">✓ Оптимально</span>';
+            return `<tr>
+              <td><strong>${clean(p.name)}</strong></td>
+              <td class="muted">${categories[p.category]}</td>
+              <td><span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span></td>
+              <td>${currency.format(eco.views)} / ${eco.clicks}</td>
+              <td><strong>${eco.orders}</strong></td>
+              <td>${rub(eco.cost)} <span class="muted">(${eco.drr.toFixed(1)}%)</span></td>
+              <td><strong>${rub(eco.revenue)}</strong></td>
+              <td>${rec}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </section>
+  `;
+}
+
+function sellerProductsView() {
+  return `
     <div class="block">
-      <h2 style="margin:0 0 14px;font-size:18px">Добавить новый товар в магазин</h2>
-      <form id="addProductForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end">
-        <label class="small muted">Название товара<input class="oz-input" name="name" required placeholder="Например: Джинсы карго утеплённые"></label>
-        <label class="small muted">Цвет<input class="oz-input" name="color" required placeholder="Например: Графитовые"></label>
-        <label class="small muted">Цена, ₽<input class="oz-input" name="price" type="number" min="100" value="2890" required></label>
-        <label class="small muted">Фото (из локальных)<select class="oz-select" name="imgKey">
-          ${Object.keys(imageUrls).map(k => `<option value="${k}">${k}.webp</option>`).join('')}
-        </select></label>
-        <label class="small muted">Уровень продвижения<select class="oz-select" name="promoTier">
-          <option value="0">Без продвижения (0 ₽)</option>
-          <option value="3">3 класс · Старт (490 ₽)</option>
-          <option value="2">2 класс · Бизнес (1 290 ₽)</option>
-          <option value="1">1 класс · Премиум (2 990 ₽)</option>
-        </select></label>
-        <button type="submit" class="btn primary" style="height:38px">Опубликовать товар</button>
+      <h2 style="margin:0 0 14px;font-size:18px">Добавить новый товар в каталог</h2>
+      <form id="addProductForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;align-items:end">
+        <label class="small muted">Категория
+          <select class="oz-select" name="category">
+            <option value="hoodies">🧥 Толстовки и худи</option>
+            <option value="jeans">👖 Джинсы</option>
+          </select>
+        </label>
+        <label class="small muted">Название товара<input class="oz-input" name="name" required placeholder="Худи оверсайз с капюшоном"></label>
+        <label class="small muted">Цвет<input class="oz-input" name="color" required placeholder="Чёрные"></label>
+        <label class="small muted">Цена, ₽<input class="oz-input" name="price" type="number" min="100" value="2590" required></label>
+        <label class="small muted">Стартовый класс
+          <select class="oz-select" name="promoTier">
+            <option value="0">Без продвижения (0 ₽)</option>
+            <option value="3">3 класс · Старт (100 ₽)</option>
+            <option value="2">2 класс · Бизнес (150 ₽)</option>
+            <option value="1">1 класс · Премиум (300 ₽)</option>
+          </select>
+        </label>
+        <button type="submit" class="btn primary" style="height:38px">Опубликовать SKU</button>
       </form>
     </div>
 
     <div class="seller-table-wrap">
-      <h2 style="margin:0 0 12px;font-size:18px">Каталог продавца (${products.length} SKU)</h2>
+      <h2 style="margin:0 0 12px;font-size:18px">Все товары магазина (${products.length} SKU)</h2>
       ${products.map(p => `
         <div class="seller-product-row">
-          <img class="seller-thumb" src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="">
+          <img class="seller-thumb" src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="">
           <div>
             <strong>${clean(p.name)}</strong>
-            <div class="muted small">Арт. ${p.sku} · ${clean(p.color)}</div>
+            <div class="muted small">${categories[p.category]} · Арт. ${p.sku} · ${clean(p.color)}</div>
           </div>
-          <div><input class="oz-input" style="height:34px" type="number" min="100" value="${p.price}" data-price-edit="${p.id}" aria-label="Цена ${clean(p.name)}"></div>
+          <div><input class="oz-input" style="height:34px" type="number" min="100" value="${p.price}" data-price-edit="${p.id}"></div>
           <div><span class="oz-pill ${PROMO_TIERS[p.promoTier || 0].colorClass}">${PROMO_TIERS[p.promoTier || 0].code}</span></div>
           <div style="display:flex;gap:8px;justify-content:flex-end">
-            <a href="${routeURL('product', { product: p.id, size: 'M', offer: 'fast' })}" class="btn subtle" style="padding:7px 12px;font-size:12.5px" data-action="product" data-id="${p.id}">Карточка</a>
             <button type="button" class="btn" style="padding:7px 12px;font-size:12.5px" data-action="savePrice" data-id="${p.id}">Сохранить цену</button>
           </div>
         </div>
       `).join('')}
     </div>
   `;
+}
 
-  const simulatorTabView = () => {
-    const simRanked = rankProducts(products, state.simQuery, 'relevance');
-    return `
-      <div class="sim-box">
-        <div class="section-head" style="margin-top:0">
-          <div>
-            <h2 style="font-size:18px">Симулятор поисковой выдачи</h2>
-            <p class="muted small" style="margin:4px 0 0">Введите запрос — таблица покажет итоговый порядок: <strong>Релевантность → 1 класс → 2 класс → 3 класс → Без продвижения</strong></p>
-          </div>
-          <a href="#/search?text=${encodeURIComponent(state.simQuery)}" class="btn primary" data-action="openSearch" data-id="${clean(state.simQuery)}">Открыть как покупатель</a>
-        </div>
-
-        <div class="sim-controls">
-          <input id="simQuery" class="oz-input" style="max-width:360px" value="${clean(state.simQuery)}" placeholder="Например: джинсы, широкие, чёрные, флис">
-          ${['джинсы', 'широкие', 'чёрные', 'багги', 'стрейч'].map(w => `<button type="button" class="btn subtle" style="padding:6px 12px;font-size:13px" data-action="setSimQuery" data-id="${w}">${w}</button>`).join('')}
-        </div>
-
-        ${simRanked.length ? simRanked.map(({ p, rel }, idx) => {
-          const tier = p.promoTier || 0;
-          const posClass = idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : '';
-          return `<div class="sim-row">
-            <span class="sim-pos ${posClass}">#${idx + 1}</span>
-            <img class="seller-thumb" style="width:40px;height:52px" src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="">
-            <div><strong>${clean(p.name)}</strong><div class="muted small">${clean(p.color)} · ${rub(p.price)}</div></div>
-            <div><span class="oz-pill" style="background:#eef4ff;color:#005bff">Релев.: ${rel}</span></div>
-            <div><span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span></div>
-            <div class="muted small">${tier === 1 ? 'Топ в группе релевантности' : tier === 2 ? 'Выше 3 класса и органики' : tier === 3 ? 'Выше органики' : 'Органическая позиция'}</div>
-          </div>`;
-        }).join('') : '<p class="muted">По этому запросу совпадений нет.</p>'}
-      </div>
-    `;
+function sellerApp() {
+  const views = {
+    promo: sellerPromoView,
+    live: sellerLiveView,
+    analytics: sellerAnalyticsView,
+    products: sellerProductsView,
   };
-
-  return `
-    <div class="seller-shell">
-      <section class="seller-topbar">
-        <div>
-          <span class="seller-badge-pill">OZON SELLER · КАБИНЕТ ПРОДАВЦА</span>
-          <h1>Denim Store · Центр продвижения</h1>
-          <p>Управляйте 3 уровнями подписки и мгновенно проверяйте позиции в выдаче Ozon.</p>
-        </div>
-        <div class="seller-wallet">
-          <div>
-            <small>Баланс продвижения</small>
-            <strong>${rub(state.sellerBalance)}</strong>
-          </div>
-          <button type="button" class="oz-hero-btn" style="padding:10px 14px;font-size:13px" data-action="topup">+ 5 000 ₽</button>
-        </div>
-      </section>
-
-      <section class="seller-kpis">
-        <div class="seller-kpi">
-          <small>Товаров в продвижении</small>
-          <strong>${promotedCount} из ${products.length}</strong>
-          <span class="kpi-sub">${tier1Count} в Первом классе</span>
-        </div>
-        <div class="seller-kpi">
-          <small>Прогноз показов / 7 дн.</small>
-          <strong>${currency.format(estViews)}</strong>
-          <span class="kpi-sub">↑ Расчёт по тарифам</span>
-        </div>
-        <div class="seller-kpi">
-          <small>Формула ранжирования</small>
-          <strong style="font-size:18px;padding-top:4px">Рел. › 1 › 2 › 3 › 0</strong>
-          <span class="kpi-sub">Активна в поиске</span>
-        </div>
-        <div class="seller-kpi">
-          <small>Рейтинг магазина</small>
-          <strong>4.9 ★</strong>
-          <span class="kpi-sub">Премиум-статус доступен</span>
-        </div>
-      </section>
-
-      <div class="seller-nav" role="tablist">
-        <button type="button" class="seller-tab" data-action="sellerTab" data-id="promo" aria-pressed="${state.sellerTab === 'promo'}">🚀 Продвижение (3 уровня)</button>
-        <button type="button" class="seller-tab" data-action="sellerTab" data-id="products" aria-pressed="${state.sellerTab === 'products'}">📦 Мои товары (${products.length})</button>
-        <button type="button" class="seller-tab" data-action="sellerTab" data-id="simulator" aria-pressed="${state.sellerTab === 'simulator'}">📊 Симулятор выдачи</button>
-      </div>
-
-      ${state.sellerTab === 'promo' ? promoTabView() : state.sellerTab === 'products' ? productsTabView() : simulatorTabView()}
-    </div>
-  `;
+  return `<div class="seller-shell">${(views[state.sellerTab] || sellerPromoView)()}</div>`;
 }
 
 /* =========================================================
-   ИЗБРАННОЕ, КОРЗИНА, ОФОРМЛЕНИЕ, ЗАКАЗЫ, OPS
+   КОРЗИНА, ИЗБРАННОЕ, ОФОРМЛЕНИЕ, ЗАКАЗЫ
    ========================================================= */
 function favorites() {
   const items = products.filter(p => state.favorites.has(p.id));
   return `<div class="section-head"><h1>Избранное</h1></div>
-    ${items.length ? `<section class="grid home-grid">${items.map(p => card(p, true, true)).join('')}</section>`
-      : `<div class="empty-box"><h3>В избранном пока пусто</h3><p class="muted">Нажимайте на сердечко на карточках, чтобы сохранить понравившиеся товары.</p><a href="#/search" class="btn primary" data-action="category" data-id="">Перейти в каталог</a></div>`}`;
+    ${items.length ? `<section class="grid home-grid">${items.map(buyerCard).join('')}</section>`
+      : `<div class="empty-box"><h3>В избранном пока пусто</h3><p class="muted">Нажимайте на сердечко, чтобы сохранить понравившиеся товары.</p><a href="#/search" class="btn primary" data-action="category" data-id="">Перейти в каталог</a></div>`}`;
 }
 
-const entryLocal = unit => ({ key: unit.id, id: unit.id, product: unit.product, size: unit.size, point: unit.point, price: unit.price, slot: 'Уже в выбранном ПВЗ' });
-function addCart(item) {
-  if (state.cart.some(x => x.key === item.key)) { say('Этот товар уже в корзине'); return; }
-  state.cart.push(item);
+const entryLocal = unit => ({ key: unit.id, id: unit.id, product: unit.product, size: unit.size, point: unit.point, price: unit.price, slot: 'Уже в выбранном ПВЗ', qty: 1 });
+
+function addCart(item, silent = false) {
+  const existing = state.cart.find(x => x.key === item.key || (x.product === item.product && x.size === item.size && !x.id && !item.id));
+  if (existing) {
+    existing.qty = (existing.qty || 1) + (item.qty || 1);
+  } else {
+    state.cart.push({ ...item, qty: item.qty || 1 });
+  }
   render();
-  say('Добавлено в корзину');
+  if (!silent) say('Добавлено в корзину');
 }
-const cartTotal = items => rub(items.reduce((s, r) => s + r.price, 0));
-function cartItemRow(item, removable) {
+
+function updateCartQty(key, delta) {
+  const item = state.cart.find(x => x.key === key);
+  if (!item) return;
+  const next = (item.qty || 1) + delta;
+  if (next <= 0) {
+    state.cart = state.cart.filter(x => x.key !== key);
+    say('Товар удалён из корзины');
+  } else {
+    item.qty = next;
+  }
+  render();
+}
+
+const cartTotalNum = items => items.reduce((s, r) => s + r.price * (r.qty || 1), 0);
+const cartTotal = items => rub(cartTotalNum(items));
+
+function cartItemRow(item, editable) {
   const p = productById(item.product);
+  const qty = item.qty || 1;
   return `<div class="cart-row">
     <div class="cart-row-left">
-      <img src="${imageUrls[p.imgKey || p.id] || imageUrls.classic}" alt="">
+      <img src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="">
       <div>
         <strong>${clean(p.name)} · ${item.size}</strong>
-        <div class="muted small">${points[item.point]}</div>
-        <div class="muted small">${item.slot}</div>
+        <div class="muted small">${points[item.point]} · ${item.slot}</div>
+        <div class="muted small">${rub(item.price)} × ${qty} шт.</div>
       </div>
     </div>
-    <div style="text-align:right">
-      <strong style="font-size:17px">${rub(item.price)}</strong>
-      ${removable ? `<div><button type="button" class="linkbtn small" data-action="remove" data-id="${item.key}">Удалить</button></div>` : ''}
+    <div style="display:flex;align-items:center;gap:14px">
+      ${editable ? `
+        <div class="oz-qty-stepper">
+          <button type="button" class="oz-qty-btn" data-action="qtyDelta" data-id="${item.key}" data-delta="-1">−</button>
+          <span class="oz-qty-val">${qty}</span>
+          <button type="button" class="oz-qty-btn" data-action="qtyDelta" data-id="${item.key}" data-delta="1">+</button>
+        </div>
+      ` : ''}
+      <div style="text-align:right;min-width:84px">
+        <strong style="font-size:17px">${rub(item.price * qty)}</strong>
+        ${editable ? `<div><button type="button" class="linkbtn small" data-action="remove" data-id="${item.key}">Удалить</button></div>` : ''}
+      </div>
     </div>
   </div>`;
 }
+
 function orderSummary(items, action, label) {
+  const totalQty = items.reduce((s, x) => s + (x.qty || 1), 0);
   return `<aside class="block">
     <h2 style="margin:0 0 14px;font-size:18px">Ваш заказ</h2>
-    <div class="summary-line"><span>Товары (${items.length})</span><span>${cartTotal(items)}</span></div>
+    <div class="summary-line"><span>Товары (${totalQty} шт.)</span><span>${cartTotal(items)}</span></div>
     <div class="summary-line"><span>Доставка в ПВЗ</span><span style="color:var(--oz-green-dark);font-weight:600">Бесплатно</span></div>
-    <div class="summary-line" style="font-size:18px;font-weight:800;padding-top:10px;border-top:1px solid var(--oz-border)"><span>Итого</span><span>${cartTotal(items)}</span></div>
-    <button type="button" class="btn primary" style="width:100%;height:46px;margin-top:8px" data-action="${action}">${label}</button>
+    <div class="summary-line" style="font-size:19px;font-weight:800;padding-top:10px;border-top:1px solid var(--oz-border)"><span>Итого</span><span>${cartTotal(items)}</span></div>
+    <button type="button" class="btn green" style="width:100%;height:48px;margin-top:8px;font-size:15px" data-action="${action}">${label}</button>
   </aside>`;
 }
+
 function cart() {
-  return `<div class="section-head"><h1>Корзина</h1><a href="#/" class="linkbtn" data-action="home">На главную</a></div>
+  return `<div class="section-head"><h1>Корзина</h1><a href="#/" class="linkbtn" data-action="home">Продолжить покупки</a></div>
     ${state.cart.length ? `<div class="order-page"><section class="block">${state.cart.map(x => cartItemRow(x, true)).join('')}</section>${orderSummary(state.cart, 'checkout', 'Перейти к оформлению')}</div>`
-      : `<div class="empty-box"><h3>Корзина пуста</h3><p class="muted">Загляните в каталог или раздел «Товары рядом».</p><a href="#/search" class="btn primary" data-action="category" data-id="">К покупкам</a></div>`}`;
+      : `<div class="empty-box"><h3>Корзина пуста</h3><p class="muted">Добавляйте джинсы и толстовки в один клик.</p><a href="#/search" class="btn primary" data-action="category" data-id="">Перейти в каталог</a></div>`}`;
 }
+
 function checkout() {
   return `<div class="oz-breadcrumbs"><a href="#/cart" class="linkbtn" data-action="cart">← Корзина</a><span>•</span><strong>Оформление заказа</strong></div>
     <div class="order-page">
@@ -1156,13 +1500,14 @@ function checkout() {
           ${state.cart.map(x => cartItemRow(x, false)).join('')}
         </section>
         <section class="block">
-          <h2 style="margin:0 0 6px;font-size:17px">Оплата при получении</h2>
+          <h2 style="margin:0 0 6px;font-size:17px">Оплата · Ozon Карта (безлимитный демо-баланс)</h2>
           <p class="muted small" style="margin:0">Одежду можно примерить в ПВЗ перед выкупом.</p>
         </section>
       </div>
-      ${orderSummary(state.cart, 'confirm', 'Оформить заказ')}
+      ${orderSummary(state.cart, 'confirm', 'Оплатить и оформить')}
     </div>`;
 }
+
 function result() {
   const onSite = state.order.some(x => x.id);
   return `<section class="block" style="max-width:720px;margin:0 auto">
@@ -1171,62 +1516,92 @@ function result() {
     ${state.order.map(x => cartItemRow(x, false)).join('')}
     <p class="muted">${onSite ? 'Заказ уже в пункте выдачи. Можно прийти и примерить сегодня.' : 'Мы сообщим, когда заказ приедет в пункт выдачи.'}</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      ${onSite ? `<button type="button" class="btn primary" data-action="buy">Забрать заказ</button><button type="button" class="btn subtle" data-action="decline">Отказаться</button>` : `<a href="#/" class="btn primary" data-action="home">Вернуться на главную</a>`}
+      ${onSite ? `<button type="button" class="btn primary" data-action="buy">Забрать заказ</button><button type="button" class="btn subtle" data-action="decline">Отказаться</button>` : `<a href="#/orders" class="btn primary" data-action="orders">Мои заказы</a><a href="#/" class="btn subtle" data-action="home">На главную</a>`}
     </div>
   </section>`;
 }
+
 function finish(declined) {
   return `<section class="empty-box" style="max-width:600px;margin:0 auto">
     <h1>${declined ? 'Отказ зарегистрирован' : 'Выкуп завершён'}</h1>
-    <p class="muted">${declined ? 'Экземпляр скрыт из подбора до повторного осмотра в ПВЗ.' : 'Экземпляр снят с остатка. Спасибо за покупку на Ozon!'}</p>
+    <p class="muted">${declined ? 'Экземпляр скрыт до повторного осмотра в ПВЗ.' : 'Спасибо за покупку на Ozon!'}</p>
     <a href="#/" class="btn primary" data-action="home">На главную</a>
   </section>`;
 }
+
 function orders() {
-  return `<div class="section-head"><h1>Заказы</h1></div>
+  return `<div class="section-head"><h1>Мои заказы</h1></div>
     <div class="stack">
-      ${state.orders.length ? state.orders.map(o => `<section class="block"><span class="oz-pill local" style="margin-bottom:8px">${o.status}</span>${o.items.map(x => cartItemRow(x, false)).join('')}</section>`).join('')
-        : `<div class="empty-box"><h3>Заказов пока нет</h3><p class="muted">Оформите заказ в корзине, и он появится здесь.</p></div>`}
+      ${state.orders.length ? state.orders.map((o, idx) => `<section class="block">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="oz-pill local">${o.status}</span>
+          <strong class="muted small">Заказ №${10420 + state.orders.length - idx} · ${cartTotal(o.items)}</strong>
+        </div>
+        ${o.items.map(x => cartItemRow(x, false)).join('')}
+      </section>`).join('')
+        : `<div class="empty-box"><h3>Заказов пока нет</h3><p class="muted">Оформите заказ в корзине или нажмите «Купить сейчас» на товаре.</p><a href="#/search" class="btn primary" data-action="category" data-id="">К покупкам</a></div>`}
     </div>`;
-}
-function ops() {
-  return `<section class="block" style="max-width:720px;margin:0 auto">
-    <h1 style="margin-top:0">Отбор вещей для локальной продажи в ПВЗ</h1>
-    <form id="ops" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <label class="small muted">Заказы за 28 дней<input class="oz-input" name="orders" type="number" min="0" value="14" required></label>
-      <label class="small muted">Порог отбора<input class="oz-input" name="limit" type="number" min="0" value="8" required></label>
-      <label class="small muted">Экономия логистики, ₽<input class="oz-input" name="savings" type="number" min="0" step="0.01" value="120" required></label>
-      <label class="small muted">Операции ПВЗ, ₽<input class="oz-input" name="handling" type="number" min="0" step="0.01" value="25" required></label>
-      <button class="btn primary" style="grid-column:1/-1">Рассчитать</button>
-    </form>
-    <output id="ops-result" style="display:block;margin-top:14px;font-weight:700"></output>
-  </section>`;
 }
 
 /* =========================================================
-   РЕНДЕР И СОБЫТИЯ
+   РЕНДЕР И УПРАВЛЕНИЕ РЕЖИМАМИ
    ========================================================= */
 function render() {
   saveSession();
+  const isSeller = state.mode === 'seller';
+
+  document.body.classList.toggle('mode-seller', isSeller);
+  document.body.classList.toggle('checkout-mode', !isSeller && state.page === 'checkout');
+
+  document.querySelector('#buyerHeader').hidden = isSeller;
+  document.querySelector('#buyerMobileBar').hidden = isSeller;
+  document.querySelector('#sellerHeader').hidden = !isSeller;
+
+  document.querySelector('#modeBuyerBtn').setAttribute('aria-selected', String(!isSeller));
+  document.querySelector('#modeSellerBtn').setAttribute('aria-selected', String(isSeller));
+  document.querySelector('#modeHint').textContent = isSeller
+    ? 'Кабинет продавца: тарифы 100/150/300 ₽, инспектор выдачи и аналитика'
+    : 'Вы смотрите витрину глазами покупателя (без служебных меток продвижения)';
+
+  if (isSeller) {
+    app.innerHTML = sellerApp();
+    document.querySelector('#sellerHeaderBalance').textContent = rub(state.sellerBalance);
+    for (const btn of document.querySelectorAll('.seller-nav-btn')) {
+      btn.setAttribute('aria-pressed', String(btn.dataset.id === state.sellerTab));
+    }
+    document.title = 'Ozon Seller · Кабинет продавца';
+    return;
+  }
+
   const pages = {
-    home: storefront, catalog, nearby, seller: sellerPage,
-    product: productPage, offers: offersModal, favorites,
-    orders, cart, checkout, result,
-    bought: () => finish(false), declined: () => finish(true), ops,
+    home: storefront, catalog, nearby,
+    product: productPage, offers: offersModal,
+    favorites, orders, cart, checkout, result,
+    bought: () => finish(false), declined: () => finish(true),
   };
   app.innerHTML = (pages[state.page] || storefront)();
+
   queryInput.value = state.q;
   document.querySelector('.oz-search-clear').hidden = !state.q;
   document.querySelector('#searchScope').value = state.category;
-  document.querySelector('#count').textContent = String(state.cart.length);
-  document.querySelector('#mobileCount').textContent = String(state.cart.length);
+
+  const totalUnits = totalCartUnits();
+  const cartBadge = document.querySelector('#count');
+  cartBadge.textContent = String(totalUnits);
+  cartBadge.hidden = totalUnits === 0;
+  document.querySelector('#mobileCount').textContent = String(totalUnits);
+
   const favBadge = document.querySelector('#favCount');
   favBadge.textContent = String(state.favorites.size);
   favBadge.hidden = state.favorites.size === 0;
-  document.querySelector('#pointLink').textContent = `Москва • ${points[state.point]}`;
-  document.body.classList.toggle('checkout-mode', state.page === 'checkout');
 
-  for (const el of document.querySelectorAll('header a[data-action], .mobile-bar a[data-action]')) {
+  const ordBadge = document.querySelector('#ordersCount');
+  ordBadge.textContent = String(state.orders.length);
+  ordBadge.hidden = state.orders.length === 0;
+
+  document.querySelector('#pointLink').textContent = `Москва • ${points[state.point]}`;
+
+  for (const el of document.querySelectorAll('#buyerHeader a[data-action], #buyerMobileBar a[data-action]')) {
     const match = (el.dataset.action === state.page) || (el.dataset.action === 'category' && state.page === 'catalog' && el.dataset.id === state.category);
     if (match) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
@@ -1234,9 +1609,8 @@ function render() {
 
   const titles = {
     home: 'Ozon — маркетплейс',
-    catalog: state.q ? `${state.q} — купить на Ozon` : 'Каталог — Ozon',
+    catalog: state.q ? `${state.q} — купить на Ozon` : (categories[state.category] || 'Каталог') + ' — Ozon',
     nearby: 'Товары рядом · Ozon',
-    seller: 'Ozon Seller · Продвижение (3 уровня)',
     favorites: 'Избранное · Ozon',
     cart: 'Корзина · Ozon',
     checkout: 'Оформление заказа · Ozon',
@@ -1252,24 +1626,28 @@ function purchaseTier(productId, newTier) {
   if (oldTier === newTier) return;
   const cost = PROMO_TIERS[newTier]?.price || 0;
   if (cost > 0 && state.sellerBalance < cost) {
-    say('Недостаточно средств на балансе — нажмите «+ 5 000 ₽»');
+    say('Недостаточно средств — нажмите «+ 500 ₽» в шапке');
     return;
   }
-  if (cost > 0) state.sellerBalance -= cost;
+  if (cost > 0) {
+    state.sellerBalance -= cost;
+    state.sellerSpent += cost;
+  }
   p.promoTier = newTier;
   state.sellerSelectedProduct = p.id;
   state.lastUpgraded = newTier > 0 ? { id: p.id, tier: newTier } : null;
   render();
-  if (newTier > 0) {
-    triggerTierPurchaseFX(newTier, p.name);
-  } else {
-    say(`Продвижение отключено для «${p.name}»`);
-  }
+  if (newTier > 0) triggerTierPurchaseFX(newTier, p.name);
+  else say(`Продвижение снято для «${p.name}»`);
   setTimeout(() => { state.lastUpgraded = null; }, 1200);
 }
 
+/* =========================================================
+   ОБРАБОТЧИКИ СОБЫТИЙ
+   ========================================================= */
 document.querySelector('#search').addEventListener('submit', e => {
   e.preventDefault();
+  state.mode = 'buyer';
   state.q = queryInput.value.trim();
   state.category = document.querySelector('#searchScope').value;
   state.sort = 'relevance';
@@ -1281,10 +1659,10 @@ queryInput.addEventListener('input', () => {
 });
 
 document.addEventListener('input', e => {
-  if (e.target.id === 'simQuery') {
-    state.simQuery = e.target.value;
+  if (e.target.id === 'liveQuery') {
+    state.liveQuery = e.target.value;
     render();
-    const el = document.querySelector('#simQuery');
+    const el = document.querySelector('#liveQuery');
     if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   }
 });
@@ -1295,59 +1673,51 @@ document.addEventListener('change', e => {
   else if (id === 'sort') state.sort = value;
   else if (id === 'only') state.only = checked;
   else if (id === 'verifiedOnly') state.verifiedOnly = checked;
-  else if (id === 'tierFilter') state.tierFilter = value;
   else if (id === 'priceMin') state.priceMin = value;
   else if (id === 'priceMax') state.priceMax = value;
   else if (id === 'sellerTargetProduct') state.sellerSelectedProduct = value;
+  else if (id === 'liveCategory') state.liveCategory = value;
+  else if (id === 'liveTierFilter') state.liveTierFilter = value;
   else return;
   render();
 });
 
 document.addEventListener('submit', e => {
-  if (e.target.id === 'ops') {
-    e.preventDefault();
-    const f = new FormData(e.target);
-    const ordersN = Number(f.get('orders'));
-    const limit = Number(f.get('limit'));
-    const net = Number(f.get('savings')) - Number(f.get('handling'));
-    document.querySelector('#ops-result').textContent = `${ordersN >= limit ? 'Проходит порог спроса' : 'Ниже порога'} · ${(ordersN / 28).toFixed(2)} заказа/день · вклад ${rub(net)}`;
-  }
   if (e.target.id === 'addProductForm') {
     e.preventDefault();
     const f = new FormData(e.target);
     const tier = Number(f.get('promoTier')) || 0;
     const cost = PROMO_TIERS[tier]?.price || 0;
-    if (cost > state.sellerBalance) {
-      say('Недостаточно средств на балансе для выбранного класса');
-      return;
-    }
-    if (cost > 0) state.sellerBalance -= cost;
-    const price = Math.max(100, Number(f.get('price')) || 2590);
+    if (cost > state.sellerBalance) { say('Недостаточно средств на балансе'); return; }
+    if (cost > 0) { state.sellerBalance -= cost; state.sellerSpent += cost; }
+    const category = String(f.get('category') || 'hoodies');
+    const price = Math.max(100, Number(f.get('price')) || 2490);
     const id = 'custom-' + Date.now();
     const newProd = {
       id,
-      imgKey: String(f.get('imgKey') || 'classic'),
-      sku: String(601284200 + products.length),
-      category: 'clothes',
+      imgKey: category === 'hoodies' ? 'h_oversize' : 'classic',
+      sku: String(709000 + products.length),
+      category,
       name: String(f.get('name')).trim(),
       color: String(f.get('color')).trim(),
       sizes: ['S', 'M', 'L', 'XL'],
       price,
-      oldPrice: Math.round(price * 2.4),
+      oldPrice: Math.round(price * 2.1),
       cheap: Math.round(price * 0.9),
       recent: products.length + 1,
       rating: 5.0,
       reviews: 1,
-      left: 15,
+      left: 20,
       verified: true,
       seller: 'Denim Store',
+      tags: category === 'hoodies' ? ['толстовка', 'худи'] : ['джинсы'],
       promoTier: tier,
     };
     products.unshift(newProd);
     state.sellerSelectedProduct = id;
     render();
     if (tier > 0) triggerTierPurchaseFX(tier, newProd.name);
-    else say(`Товар «${newProd.name}» добавлен в каталог`);
+    else say(`Товар «${newProd.name}» опубликован`);
   }
 });
 
@@ -1360,20 +1730,48 @@ document.addEventListener('click', e => {
   const p = productById(state.product);
 
   switch (action) {
+    case 'setMode':
+      state.mode = id === 'seller' ? 'seller' : 'buyer';
+      if (state.mode === 'buyer' && !['home', 'catalog', 'nearby', 'product', 'favorites', 'orders', 'cart'].includes(state.page)) {
+        state.page = 'home';
+      }
+      history.pushState(null, '', routeURL(state.page));
+      render();
+      scrollTo(0, 0);
+      break;
+    case 'resetDemo':
+      localStorage.removeItem(storageKey);
+      location.hash = '#/';
+      location.reload();
+      break;
     case 'clearQuery':
       queryInput.value = '';
       state.q = '';
       queryInput.focus();
       document.querySelector('.oz-search-clear').hidden = true;
       break;
-    case 'home': state.q = ''; state.category = ''; state.only = false; go('home'); break;
-    case 'nearby': state.q = ''; state.category = ''; state.only = false; go('nearby'); break;
-    case 'seller': go('seller'); break;
-    case 'sellerTab': state.sellerTab = id; go('seller'); break;
-    case 'topup': state.sellerBalance += 5000; render(); say('Баланс пополнен на 5 000 ₽'); break;
+    case 'home': state.mode = 'buyer'; state.q = ''; state.category = ''; state.only = false; go('home'); break;
+    case 'nearby': state.mode = 'buyer'; state.q = ''; state.category = ''; state.only = false; go('nearby'); break;
+    case 'sellerTab':
+      state.mode = 'seller';
+      state.sellerTab = id;
+      history.pushState(null, '', routeURL('seller'));
+      render();
+      scrollTo(0, 0);
+      break;
+    case 'sellerCatFilter': state.sellerCatFilter = id; render(); break;
+    case 'openLiveFor':
+      state.mode = 'seller';
+      state.sellerTab = 'live';
+      state.liveCategory = id || '';
+      state.liveQuery = '';
+      history.pushState(null, '', routeURL('seller'));
+      render();
+      scrollTo(0, 0);
+      break;
+    case 'setLiveQuery': state.liveQuery = id; render(); break;
+    case 'topup': state.sellerBalance += 500; render(); say('Баланс пополнен на 500 ₽'); break;
     case 'buyTier': purchaseTier(id, Number(b.dataset.tier)); break;
-    case 'setSimQuery': state.simQuery = id; render(); break;
-    case 'openSearch': state.q = id || ''; state.category = ''; state.sort = 'relevance'; go('catalog'); break;
     case 'savePrice': {
       const inp = document.querySelector(`[data-price-edit="${id}"]`);
       const targetProd = productById(id);
@@ -1384,12 +1782,12 @@ document.addEventListener('click', e => {
       }
       break;
     }
-    case 'category': state.q = ''; state.category = id; state.only = false; go('catalog'); break;
+    case 'category': state.mode = 'buyer'; state.q = ''; state.category = id; state.only = false; go('catalog'); break;
     case 'point': go(state.page === 'nearby' ? 'nearby' : 'catalog'); document.querySelector('#point')?.focus(); break;
     case 'backListing': go(state.from || 'catalog'); break;
     case 'resetFilter':
       state.q = ''; state.only = false; state.verifiedOnly = false;
-      state.tierFilter = 'all'; state.priceMin = ''; state.priceMax = '';
+      state.priceMin = ''; state.priceMax = '';
       go('catalog');
       break;
     case 'product': {
@@ -1404,6 +1802,30 @@ document.addEventListener('click', e => {
       go('product');
       break;
     }
+    case 'quickAdd': {
+      const prod = productById(id);
+      if (!prod) break;
+      const sz = b.dataset.size || 'M';
+      const localUnit = unitsFor(prod, sz)[0];
+      if (localUnit) addCart(entryLocal(localUnit));
+      else addCart({ key: `${prod.id}-${sz}-${state.point}-fast`, product: prod.id, size: sz, point: state.point, price: prod.price, slot: 'Доставка завтра', qty: 1 });
+      break;
+    }
+    case 'qtyDelta':
+      updateCartQty(id, Number(b.dataset.delta));
+      break;
+    case 'buyNow': {
+      const prod = productById(id);
+      if (!prod) break;
+      const offer = selectedProductOffer(prod);
+      const already = cartItemForProduct(prod.id, state.size);
+      if (!already) {
+        if (offer.kind === 'local' && offer.unit && isFree(offer.unit)) addCart(entryLocal(offer.unit), true);
+        else addCart({ key: `${prod.id}-${state.size}-${state.point}-${offer.kind}`, product: prod.id, size: state.size, point: state.point, price: offer.price, slot: offer.delivery, qty: 1 }, true);
+      }
+      go('checkout');
+      break;
+    }
     case 'favorite':
       if (state.favorites.has(id)) state.favorites.delete(id);
       else state.favorites.add(id);
@@ -1411,7 +1833,6 @@ document.addEventListener('click', e => {
       break;
     case 'favorites': go('favorites'); break;
     case 'orders': go('orders'); break;
-    case 'ops': go('ops'); break;
     case 'offers': go('offers'); break;
     case 'backProduct': go('product'); break;
     case 'dismiss': if (e.target === b) go('product'); break;
@@ -1438,20 +1859,20 @@ document.addEventListener('click', e => {
         const u = unitById(item.unit);
         if (u && isFree(u)) addCart(entryLocal(u));
       } else {
-        addCart({ key: item.key, product: item.product, size: item.size, point: item.point, price: item.price, slot: item.slot });
+        addCart({ key: item.key, product: item.product, size: item.size, point: item.point, price: item.price, slot: item.slot, qty: 1 });
       }
       break;
     }
     case 'addRemote':
-      addCart({ key: `${p.id}-${state.size}-${state.point}-${id}`, product: p.id, size: state.size, point: state.point, price: id === 'fast' ? p.price : p.cheap, slot: id === 'fast' ? 'Доставка завтра' : 'Доставка через 3 дня' });
+      addCart({ key: `${p.id}-${state.size}-${state.point}-${id}`, product: p.id, size: state.size, point: state.point, price: id === 'fast' ? p.price : p.cheap, slot: id === 'fast' ? 'Доставка завтра' : 'Доставка через 3 дня', qty: 1 });
       break;
     case 'remove': state.cart = state.cart.filter(x => x.key !== id); render(); break;
     case 'cart': go('cart'); break;
     case 'checkout': if (state.cart.length) go('checkout'); break;
     case 'confirm':
       if (state.cart.length) {
-        state.order = [...state.cart];
-        state.orders.unshift({ items: [...state.cart], status: 'Заказ оформлен' });
+        state.order = state.cart.map(x => ({ ...x }));
+        state.orders.unshift({ items: state.cart.map(x => ({ ...x })), status: 'Заказ оформлен' });
         for (const x of state.cart) if (x.id) state.reserved.add(x.id);
         state.cart = [];
         go('result');
@@ -1473,3 +1894,4 @@ document.addEventListener('keydown', e => {
 restoreSession();
 readRoute();
 render();
+
