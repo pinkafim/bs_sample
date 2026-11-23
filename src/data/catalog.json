@@ -1,0 +1,270 @@
+{
+  "products": [
+    {
+      "id": "jeans-straight-dark",
+      "title": "Джинсы прямые классические",
+      "brand": "Ozon Basic",
+      "category": "jeans",
+      "similarityGroup": "straight",
+      "colorName": "тёмно-синий",
+      "colorHex": "#1E3A5F",
+      "price": 2590,
+      "rating": 4.9,
+      "reviewsCount": 318,
+      "sizes": ["S", "M", "L", "XL"],
+      "image": "./samples/jeans-straight-dark/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Доставка сегодня вечером со склада",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-1042",
+          "size": "M",
+          "pvzId": "pvz-mira-182",
+          "pvzAddress": "проспект Мира, 182",
+          "distanceMeters": 300,
+          "qty": 1,
+          "daysLeftInPvz": 3,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-light-banana",
+      "title": "Джинсы бананы светлые",
+      "brand": "Denim Studio",
+      "category": "jeans",
+      "similarityGroup": "straight",
+      "colorName": "светло-голубой",
+      "colorHex": "#93C5FD",
+      "price": 2490,
+      "rating": 4.8,
+      "reviewsCount": 214,
+      "sizes": ["S", "M", "L"],
+      "image": "./samples/jeans-light-banana/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Завтра со склада",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-1088",
+          "size": "M",
+          "pvzId": "pvz-mira-182",
+          "pvzAddress": "проспект Мира, 182",
+          "distanceMeters": 300,
+          "qty": 1,
+          "daysLeftInPvz": 4,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-baggy-china",
+      "title": "Джинсы багги винтажные",
+      "brand": "Urban Seoul",
+      "category": "jeans",
+      "similarityGroup": "wide",
+      "colorName": "винтажный синий",
+      "colorHex": "#475569",
+      "price": 2390,
+      "rating": 4.7,
+      "reviewsCount": 96,
+      "sizes": ["S", "M", "L"],
+      "image": "./samples/jeans-baggy-china/cover.jpg",
+      "isCrossBorder": true,
+      "regularDeliveryLabel": "Через 3 недели (из-за рубежа)",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-2019",
+          "size": "M",
+          "pvzId": "pvz-yar-21a",
+          "pvzAddress": "Ярославская ул., 21А",
+          "distanceMeters": 550,
+          "qty": 1,
+          "daysLeftInPvz": 2,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-straight-indigo",
+      "title": "Джинсы прямые индиго",
+      "brand": "North Denim",
+      "category": "jeans",
+      "similarityGroup": "straight",
+      "colorName": "индиго",
+      "colorHex": "#312E81",
+      "price": 2550,
+      "rating": 4.8,
+      "reviewsCount": 142,
+      "sizes": ["M", "L", "XL"],
+      "image": "./samples/jeans-straight-indigo/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Послезавтра со склада",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-1105",
+          "size": "M",
+          "pvzId": "pvz-kib-8",
+          "pvzAddress": "ул. Кибальчича, 8",
+          "distanceMeters": 650,
+          "qty": 1,
+          "daysLeftInPvz": 1,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-straight-graphite",
+      "title": "Джинсы прямые графит",
+      "brand": "Base Line",
+      "category": "jeans",
+      "similarityGroup": "straight",
+      "colorName": "графитовый",
+      "colorHex": "#334155",
+      "price": 2690,
+      "rating": 4.9,
+      "reviewsCount": 184,
+      "sizes": ["S", "M", "L"],
+      "image": "./samples/jeans-straight-graphite/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Через 2 дня со склада",
+      "pvzStock": []
+    },
+    {
+      "id": "jeans-straight-fleece",
+      "title": "Джинсы прямые утеплённые на флисе",
+      "brand": "Winter Craft",
+      "category": "jeans",
+      "similarityGroup": "straight",
+      "colorName": "чёрный",
+      "colorHex": "#111827",
+      "price": 2590,
+      "rating": 4.8,
+      "reviewsCount": 412,
+      "sizes": ["M", "L", "XL"],
+      "image": "./samples/jeans-straight-fleece/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Завтра со склада",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-1301",
+          "size": "L",
+          "pvzId": "pvz-mira-182",
+          "pvzAddress": "проспект Мира, 182",
+          "distanceMeters": 300,
+          "qty": 1,
+          "daysLeftInPvz": 5,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-wide-china-gray",
+      "title": "Джинсы широкие washed gray",
+      "brand": "Guangzhou Loft",
+      "category": "jeans",
+      "similarityGroup": "wide",
+      "colorName": "серый деним",
+      "colorHex": "#64748B",
+      "price": 2190,
+      "rating": 4.6,
+      "reviewsCount": 67,
+      "sizes": ["M", "L", "XL"],
+      "image": "./samples/jeans-wide-china-gray/cover.jpg",
+      "isCrossBorder": true,
+      "regularDeliveryLabel": "Через 3–4 недели (из-за рубежа)",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-2044",
+          "size": "L",
+          "pvzId": "pvz-mira-182",
+          "pvzAddress": "проспект Мира, 182",
+          "distanceMeters": 300,
+          "qty": 1,
+          "daysLeftInPvz": 2,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-mom-blue",
+      "title": "Джинсы mom fit голубые",
+      "brand": "Everyday Wear",
+      "category": "jeans",
+      "similarityGroup": "wide",
+      "colorName": "голубой",
+      "colorHex": "#60A5FA",
+      "price": 2290,
+      "rating": 4.9,
+      "reviewsCount": 275,
+      "sizes": ["S", "M", "L"],
+      "image": "./samples/jeans-mom-blue/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Завтра со склада",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-1409",
+          "size": "M",
+          "pvzId": "pvz-malo-14",
+          "pvzAddress": "ул. Маломосковская, 14",
+          "distanceMeters": 800,
+          "qty": 1,
+          "daysLeftInPvz": 2,
+          "isSellerOwned": true,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-slim-black",
+      "title": "Джинсы зауженные чёрные",
+      "brand": "Ozon Basic",
+      "category": "jeans",
+      "similarityGroup": "slim",
+      "colorName": "чёрный",
+      "colorHex": "#18181B",
+      "price": 2450,
+      "rating": 4.7,
+      "reviewsCount": 190,
+      "sizes": ["S", "M", "L"],
+      "image": "./samples/jeans-slim-black/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Завтра со склада",
+      "pvzStock": [
+        {
+          "instanceId": "PLK-1502",
+          "size": "S",
+          "pvzId": "pvz-yar-21a",
+          "pvzAddress": "Ярославская ул., 21А",
+          "distanceMeters": 550,
+          "qty": 1,
+          "daysLeftInPvz": 4,
+          "isSellerOwned": false,
+          "defaultPromoted": false
+        }
+      ]
+    },
+    {
+      "id": "jeans-wide-warehouse",
+      "title": "Джинсы широкие плотный деним",
+      "brand": "Studio Fit",
+      "category": "jeans",
+      "similarityGroup": "wide",
+      "colorName": "синий",
+      "colorHex": "#2563EB",
+      "price": 2890,
+      "rating": 4.8,
+      "reviewsCount": 112,
+      "sizes": ["S", "M", "L"],
+      "image": "./samples/jeans-wide-warehouse/cover.jpg",
+      "isCrossBorder": false,
+      "regularDeliveryLabel": "Через 3 дня со склада",
+      "pvzStock": []
+    }
+  ]
+}
