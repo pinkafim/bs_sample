@@ -29,13 +29,13 @@ const imageUrls = {
   cable: 'images/cable.webp',
   sneakers: 'images/sneakers.webp',
   denim: 'images/denim.webp',
-  // Новые джинсы из приложенного файла
+  // Новые джинсы
   j_bigar: 'https://ir.ozone.ru/s3/multimedia-1-6/wc500/7448512362.jpg',
   j_marcopolo: 'https://ir.ozone.ru/s3/multimedia-1-m/wc500/14907470350.jpg',
   j_diagonal: 'https://ir.ozone.ru/s3/multimedia-1-7/wc500/12922119691.jpg',
   j_justdenim: garmentSvg('jeans', '#1e293b', '#60a5fa', 'JUST DENIM ЗИМА'),
 
-  // Толстовки и худи (из приложенных файлов)
+  // Толстовки и худи
   h_veneziani: 'https://ir.ozone.ru/s3/multimedia-1-b/wc500/21229350275.jpg',
   h_club: 'https://ir.ozone.ru/s3/multimedia-1-p/wc500/20684084317.jpg',
   h_hoodie_dv: 'https://ir.ozone.ru/s3/multimedia-1-m/wc500/20946362998.jpg',
@@ -74,48 +74,60 @@ const categories = {
   hoodies: 'Толстовки и худи',
 };
 
-/* 3 уровня продвижения: 100 / 150 / 300 ₽ */
+/* Модель CPO Ozon: процент от цены товара списывается только при заказе (0 ₽ авансом) */
 const PROMO_TIERS = {
   1: {
-    tier: 1, rank: 1, code: '1 класс', name: 'Первый класс',
-    subtitle: 'Максимальный приоритет в выдаче',
-    price: 300, boostLabel: '+300% к показам',
+    tier: 1, rank: 1,
+    rate: 0.12, ratePct: 12,
+    code: '1 класс · 12%', shortCode: '1 класс',
+    name: 'Топ-выдача (CPO)',
+    subtitle: 'Максимальный приоритет как в комбо-ставке Ozon',
+    boostLabel: '+300% к показам',
     viewsMult: 4.0, ctr: 0.068, cr: 0.095,
-    stars: '★★★', badge: '1 класс · Топ', colorClass: 'tier-1',
+    stars: '★★★', badge: '1 класс · 12%', colorClass: 'tier-1',
     perks: [
       'Топ выдачи внутри своей группы релевантности',
       'Премиум-корона на кнопке карточки у покупателей',
-      'Максимальный охват и приоритет в рекомендациях',
+      '0 ₽ предоплаты — 12% списывается только с заказа',
     ],
   },
   2: {
-    tier: 2, rank: 2, code: '2 класс', name: 'Второй класс',
-    subtitle: 'Ускорение выше 3 класса и органики',
-    price: 150, boostLabel: '+130% к показам',
+    tier: 2, rank: 2,
+    rate: 0.09, ratePct: 9,
+    code: '2 класс · 9%', shortCode: '2 класс',
+    name: 'Усиленный буст (CPO)',
+    subtitle: 'Уверенный вывод выше 3 класса и органики',
+    boostLabel: '+130% к показам',
     viewsMult: 2.3, ctr: 0.052, cr: 0.082,
-    stars: '★★', badge: '2 класс · Буст', colorClass: 'tier-2',
+    stars: '★★', badge: '2 класс · 9%', colorClass: 'tier-2',
     perks: [
-      'Вывод выше 3 класса и товаров без продвижения',
-      'Оптимальный баланс стоимости (150 ₽) и охвата',
-      'Повышенная видимость в похожих предложениях',
+      'Приоритет выше 3 класса и карточек без буста',
+      'Оптимальный ДРР 9% для категорий с высокой конкуренцией',
+      '0 ₽ предоплаты — списание только после оформления заказа',
     ],
   },
   3: {
-    tier: 3, rank: 3, code: '3 класс', name: 'Третий класс',
-    subtitle: 'Стартовое поднятие над органикой',
-    price: 100, boostLabel: '+55% к показам',
+    tier: 3, rank: 3,
+    rate: 0.06, ratePct: 6,
+    code: '3 класс · 6%', shortCode: '3 класс',
+    name: 'Базовый старт (CPO)',
+    subtitle: 'Минимальная ставка Ozon для поднятия над органикой',
+    boostLabel: '+55% к показам',
     viewsMult: 1.55, ctr: 0.041, cr: 0.072,
-    stars: '★', badge: '3 класс · Старт', colorClass: 'tier-3',
+    stars: '★', badge: '3 класс · 6%', colorClass: 'tier-3',
     perks: [
-      'Приоритет над всеми товарами без продвижения',
-      'Доступная цена 100 ₽ для теста новых карточек',
-      'Быстрый набор первых кликов и отзывов',
+      'Вывод выше всех товаров без продвижения',
+      'Щадящий ДРР 6% — безопасно для недорогих товаров и новинок',
+      '0 ₽ предоплаты — платите только за реальный заказ',
     ],
   },
   0: {
-    tier: 0, rank: 4, code: 'Без продвижения', name: 'Органика',
-    subtitle: 'Базовая выдача',
-    price: 0, boostLabel: 'Базовые показы',
+    tier: 0, rank: 4,
+    rate: 0, ratePct: 0,
+    code: 'Органика · 0%', shortCode: 'Без продвижения',
+    name: 'Органика',
+    subtitle: 'Базовая выдача без рекламной комиссии',
+    boostLabel: 'Базовые показы',
     viewsMult: 1.0, ctr: 0.031, cr: 0.062,
     stars: '—', badge: 'Органика', colorClass: 'tier-0',
     perks: ['Обычное размещение после товаров 1, 2 и 3 класса'],
@@ -160,9 +172,9 @@ const defaultProducts = [
 
 let products = defaultProducts.map(p => ({ ...p }));
 
-/* Расширенный склад ПВЗ («Товары рядом») — 11 моделей на Мира и 9 на Ярославской */
+/* Склад ПВЗ («Товары рядом») */
 const stock = [
-  // ПВЗ: проспект Мира, 182 (джинсы + толстовки/худи)
+  // ПВЗ: проспект Мира, 182
   { id: 'M-J-01', product: 'j_bigar', point: 'mira', size: 'M', price: 2863 },
   { id: 'M-J-02', product: 'j_bigar', point: 'mira', size: 'L', price: 2863 },
   { id: 'M-J-03', product: 'j_diagonal', point: 'mira', size: 'M', price: 3199 },
@@ -178,7 +190,7 @@ const stock = [
   { id: 'M-H-13', product: 'h_milk', point: 'mira', size: 'M', price: 2590 },
   { id: 'M-H-14', product: 'h_veneziani', point: 'mira', size: 'L', price: 2190 },
 
-  // ПВЗ: Ярославская улица, 21А (джинсы + толстовки/худи)
+  // ПВЗ: Ярославская улица, 21А
   { id: 'Y-J-01', product: 'j_bigar', point: 'yara', size: 'L', price: 2863 },
   { id: 'Y-J-02', product: 'j_diagonal', point: 'yara', size: 'S', price: 3199 },
   { id: 'Y-J-03', product: 'j_justdenim', point: 'yara', size: 'M', price: 3490 },
@@ -197,12 +209,12 @@ const notice = document.querySelector('#notice');
 const fxLayer = document.querySelector('#fxLayer');
 
 const state = {
-  mode: 'buyer', // 'buyer' | 'seller'
+  mode: 'buyer',
   page: 'home',
   from: 'home',
   q: '',
   category: '',
-  nearbyCategory: '', // '' | 'jeans' | 'hoodies'
+  nearbyCategory: '',
   sort: 'relevance',
   only: false,
   verifiedOnly: false,
@@ -218,8 +230,9 @@ const state = {
   sellerTab: 'promo',
   sellerSelectedProduct: 'h_tvoe',
   sellerCatFilter: 'all',
-  sellerBalance: 1500,
-  sellerSpent: 1550,
+  sellerBalance: 5000,
+  sellerSpent: 0,
+  cpoEvents: [], // реальные списания CPO после заказов покупателя
   liveQuery: '',
   liveCategory: '',
   liveTierFilter: 'all',
@@ -247,6 +260,7 @@ const nearbyProducts = (cat = '') => rankProducts(
   'relevance'
 ).map(x => x.p);
 const tierRank = tier => (PROMO_TIERS[tier]?.rank ?? 4);
+const cpoFee = (p, tier = p.promoTier || 0) => Math.round(p.price * (PROMO_TIERS[tier]?.rate || 0));
 const imgFor = p => imageUrls[p.imgKey || p.id] || imageUrls.classic;
 const imgFallbackAttr = p => {
   const fb = fallbackImgByKey[p.imgKey || p.id];
@@ -258,7 +272,7 @@ const cartItemForProduct = (productId, size = null) =>
   state.cart.find(item => item.product === productId && (!size || item.size === size));
 
 const offerTabs = [['fast', 'Быстрее доставка'], ['cheap', 'Ниже цена'], ['local', 'Уже в ПВЗ']];
-const storageKey = 'ozon-mvp-v7-nearby';
+const storageKey = 'ozon-mvp-v8-cpo';
 
 function saveSession() {
   try {
@@ -273,6 +287,7 @@ function saveSession() {
       point: state.point,
       sellerBalance: state.sellerBalance,
       sellerSpent: state.sellerSpent,
+      cpoEvents: state.cpoEvents,
       sellerSelectedProduct: state.sellerSelectedProduct,
       products,
     }));
@@ -284,7 +299,7 @@ function restoreSession() {
     const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
     if (Array.isArray(saved.products) && saved.products.length) products = saved.products;
     if (saved.mode === 'buyer' || saved.mode === 'seller') state.mode = saved.mode;
-    for (const k of ['cart', 'order', 'orders']) if (Array.isArray(saved[k])) state[k] = saved[k];
+    for (const k of ['cart', 'order', 'orders', 'cpoEvents']) if (Array.isArray(saved[k])) state[k] = saved[k];
     for (const k of ['favorites', 'reserved', 'completed']) if (Array.isArray(saved[k])) state[k] = new Set(saved[k]);
     if (points[saved.point]) state.point = saved.point;
     if (typeof saved.sellerBalance === 'number') state.sellerBalance = saved.sellerBalance;
@@ -297,7 +312,7 @@ function restoreSession() {
 
 /* =========================================================
    АЛГОРИТМ РАНЖИРОВАНИЯ:
-   Релевантность -> 1 класс -> 2 класс -> 3 класс -> Органика
+   Релевантность -> 1 класс (12%) -> 2 класс (9%) -> 3 класс (6%) -> Органика (0%)
    ========================================================= */
 function normalizeTerm(word) {
   const w = word.toLocaleLowerCase('ru').replace(/ё/g, 'е');
@@ -456,15 +471,16 @@ function say(message) {
   notice.textContent = message;
   notice.hidden = false;
   clearTimeout(say.timer);
-  say.timer = setTimeout(() => { notice.hidden = true; }, 2400);
+  say.timer = setTimeout(() => { notice.hidden = true; }, 2600);
 }
 
 /* =========================================================
-   ЭФФЕКТЫ ПОКУПКИ ПОДПИСКИ (SELLER)
+   ЭФФЕКТЫ ПОДКЛЮЧЕНИЯ CPO-СТАВКИ (SELLER)
    ========================================================= */
-function triggerTierPurchaseFX(tier, productName) {
+function triggerTierPurchaseFX(tier, product) {
   const info = PROMO_TIERS[tier];
   if (!info || tier === 0) return;
+  const fee = cpoFee(product, tier);
 
   const palettes = {
     1: ['#f1117e', '#7c3aed', '#005bff', '#ffb800', '#ffffff'],
@@ -505,8 +521,8 @@ function triggerTierPurchaseFX(tier, productName) {
   banner.innerHTML = `
     <span style="font-size:20px">${tier === 1 ? '👑' : tier === 2 ? '⚡' : '🚀'}</span>
     <div>
-      <div>Подключён ${info.name} (${info.code}) · ${rub(info.price)}</div>
-      <div style="font-size:12px;font-weight:500;opacity:.92">${clean(productName)} · ${info.boostLabel}</div>
+      <div>Активна ставка ${info.ratePct}% с заказа (${info.shortCode}) · 0 ₽ авансом</div>
+      <div style="font-size:12px;font-weight:500;opacity:.92">${clean(product.name)} · ≈ ${rub(fee)} при продаже</div>
     </div>
   `;
   document.body.appendChild(banner);
@@ -515,7 +531,7 @@ function triggerTierPurchaseFX(tier, productName) {
     banner.style.opacity = '0';
     banner.style.transform = 'translate(-50%, -14px)';
     setTimeout(() => banner.remove(), 320);
-  }, 2500);
+  }, 2600);
 }
 
 /* =========================================================
@@ -591,6 +607,7 @@ function inspectorCard(p, position, relScore) {
   const pct = discountPct(p);
   const nextTier = tier === 1 ? 0 : tier === 2 ? 1 : tier === 3 ? 2 : 3;
   const nextMeta = PROMO_TIERS[nextTier];
+  const nextFee = cpoFee(p, nextTier);
 
   return `<article class="oz-card ${tier ? 'inspector-tier-' + tier : ''}">
     <div class="oz-card-visual">
@@ -611,16 +628,16 @@ function inspectorCard(p, position, relScore) {
       <div class="oz-card-title" style="font-weight:600">${clean(p.name)}</div>
       <div class="inspector-meta-strip">
         <span>Релев.: <strong>${relScore}</strong></span>
-        <span>Рейтинг: <strong>★ ${p.rating}</strong></span>
+        <span>CPO: <strong>${tier ? `${rub(cpoFee(p))}/зак.` : '0 ₽'}</strong></span>
       </div>
       <div class="oz-card-cta-wrap" style="display:flex;gap:6px">
         ${tier !== 1 ? `
-          <button type="button" class="oz-card-cta" style="height:36px;font-size:12.5px" data-action="buyTier" data-id="${p.id}" data-tier="${nextTier}">
-            ↑ ${nextMeta.code} (${rub(nextMeta.price)})
+          <button type="button" class="oz-card-cta" style="height:36px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="${nextTier}">
+            ↑ ${nextMeta.ratePct}% (${rub(nextFee)}/зак.)
           </button>
         ` : `
-          <button type="button" class="oz-card-cta" style="height:36px;font-size:12.5px;background:var(--tier1-grad)" data-action="buyTier" data-id="${p.id}" data-tier="0">
-            👑 Максимум · Снять
+          <button type="button" class="oz-card-cta" style="height:36px;font-size:12px;background:var(--tier1-grad)" data-action="buyTier" data-id="${p.id}" data-tier="0">
+            👑 12% Максимум · Снять
           </button>
         `}
       </div>
@@ -1057,7 +1074,7 @@ function offersModal() {
 }
 
 /* =========================================================
-   РЕЖИМ ПРОДАВЦА (OZON SELLER)
+   РЕЖИМ ПРОДАВЦА (OZON SELLER — МОДЕЛЬ CPO 6% / 9% / 12%)
    ========================================================= */
 function simulatePosition(targetId, hypotheticalTier, categoryScope = '') {
   const copy = products
@@ -1076,15 +1093,17 @@ function productEconomics(p) {
   const clicks = Math.round(views * meta.ctr);
   const orders = Math.max(1, Math.round(clicks * meta.cr));
   const revenue = orders * p.price;
-  const cost = meta.price;
-  const drr = revenue > 0 ? ((cost / revenue) * 100) : 0;
-  return { views, clicks, orders, revenue, cost, drr };
+  const feePerOrder = cpoFee(p, tier);
+  const cost = orders * feePerOrder;
+  const drr = meta.ratePct;
+  return { views, clicks, orders, revenue, feePerOrder, cost, drr };
 }
 
 function sellerPromoView() {
   const selectedProd = productById(state.sellerSelectedProduct) || products[0];
   const curCatPos = simulatePosition(selectedProd.id, selectedProd.promoTier || 0, selectedProd.category);
   const curAllPos = simulatePosition(selectedProd.id, selectedProd.promoTier || 0, '');
+  const curTier = selectedProd.promoTier || 0;
 
   const visibleRows = products.filter(p => state.sellerCatFilter === 'all' || p.category === state.sellerCatFilter);
   const allRankMap = new Map(rankProducts(products, '', 'relevance').map((x, i) => [x.p.id, i + 1]));
@@ -1093,31 +1112,31 @@ function sellerPromoView() {
     <section class="target-picker-card">
       <img class="target-picker-thumb" src="${imgFor(selectedProd)}" ${imgFallbackAttr(selectedProd)} alt="">
       <div>
-        <span class="target-picker-step">Шаг 1 · Выбор товара для тарифа</span>
+        <span class="target-picker-step">Модель CPO · Оплата % только за заказ</span>
         <div style="font-size:19px;font-weight:800;line-height:1.25">${clean(selectedProd.name)}</div>
         <div class="target-picker-meta">
-          <span class="oz-pill ${PROMO_TIERS[selectedProd.promoTier || 0].colorClass}">${PROMO_TIERS[selectedProd.promoTier || 0].code}</span>
-          <span>Категория: <strong>${categories[selectedProd.category]}</strong></span>
-          <span>•</span>
+          <span class="oz-pill ${PROMO_TIERS[curTier].colorClass}">${PROMO_TIERS[curTier].code}</span>
           <span>Цена: <strong>${rub(selectedProd.price)}</strong></span>
+          <span>•</span>
+          <span>Комиссия за 1 заказ: <strong>${curTier ? rub(cpoFee(selectedProd)) : '0 ₽'}</strong></span>
           <span>•</span>
           <span>Место в категории: <strong>#${curCatPos}</strong> (в общем: #${curAllPos})</span>
         </div>
       </div>
       <div class="target-select-wrap">
-        <label class="target-select-label" for="sellerTargetProduct">Выберите товар, чтобы подключить 1, 2 или 3 класс ниже:</label>
+        <label class="target-select-label" for="sellerTargetProduct">Выберите товар — ставки ниже автоматически пересчитаются в рублях:</label>
         <div class="target-select-box">
           <select id="sellerTargetProduct" class="target-select-fancy">
             <optgroup label="👖 Джинсы">
-              ${products.filter(p => p.category === 'jeans').map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} — ${PROMO_TIERS[p.promoTier || 0].code}</option>`).join('')}
+              ${products.filter(p => p.category === 'jeans').map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} (${rub(p.price)}) — ${PROMO_TIERS[p.promoTier || 0].ratePct}%</option>`).join('')}
             </optgroup>
             <optgroup label="🧥 Толстовки и худи">
-              ${products.filter(p => p.category === 'hoodies').map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} — ${PROMO_TIERS[p.promoTier || 0].code}</option>`).join('')}
+              ${products.filter(p => p.category === 'hoodies').map(p => `<option value="${p.id}" ${p.id === selectedProd.id ? 'selected' : ''}>${clean(p.name)} (${rub(p.price)}) — ${PROMO_TIERS[p.promoTier || 0].ratePct}%</option>`).join('')}
             </optgroup>
           </select>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px">
-          <span class="muted">3 карточки тарифов ниже применятся к этому SKU</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;gap:8px;flex-wrap:wrap">
+          <button type="button" class="linkbtn small" data-action="simOrder" data-id="${selectedProd.id}">🧪 Тест: симулировать 1 заказ</button>
           <button type="button" class="linkbtn small" data-action="openLiveFor" data-id="${selectedProd.category}">Проверить в живой выдаче →</button>
         </div>
       </div>
@@ -1126,18 +1145,22 @@ function sellerPromoView() {
     <div class="tiers-grid">
       ${[3, 2, 1].map(t => {
         const meta = PROMO_TIERS[t];
-        const isCurrent = (selectedProd.promoTier || 0) === t;
+        const isCurrent = curTier === t;
         const projPos = simulatePosition(selectedProd.id, t, selectedProd.category);
+        const fee = cpoFee(selectedProd, t);
         return `<article class="tier-card level-${t}">
           <div class="tier-head">
-            <span class="tier-level-tag">${t === 1 ? '👑 ' : t === 2 ? '⚡ ' : '🚀 '}${meta.code}</span>
+            <span class="tier-level-tag">${t === 1 ? '👑 ' : t === 2 ? '⚡ ' : '🚀 '}${meta.shortCode}</span>
             <span class="tier-stars">${meta.stars}</span>
           </div>
           <div>
             <h3>${meta.name}</h3>
             <p class="muted small" style="margin:4px 0 0">${meta.subtitle}</p>
           </div>
-          <div class="tier-price">${rub(meta.price)} <small>/ 7 дней</small></div>
+          <div>
+            <div class="tier-price">${meta.ratePct}% <small>с цены заказа</small></div>
+            <div class="small" style="color:var(--oz-blue);font-weight:700;margin-top:3px">≈ ${rub(fee)} за 1 продажу этого товара · 0 ₽ авансом</div>
+          </div>
           <div class="tier-forecast-pill">
             <span>Прогноз в «${categories[selectedProd.category]}»:</span>
             <strong>#${curCatPos} → #${projPos}</strong>
@@ -1153,7 +1176,7 @@ function sellerPromoView() {
           </ul>
           <div class="tier-card-footer">
             <button type="button" class="tier-buy-btn" data-action="buyTier" data-id="${selectedProd.id}" data-tier="${t}" ${isCurrent ? 'disabled style="opacity:.65;cursor:default"' : ''}>
-              ${isCurrent ? '✓ Активен для выбранного товара' : `Подключить ${meta.code} за ${rub(meta.price)}`}
+              ${isCurrent ? `✓ Активна ставка ${meta.ratePct}%` : `Подключить ${meta.ratePct}% (${rub(fee)}/заказ)`}
             </button>
           </div>
         </article>`;
@@ -1163,8 +1186,8 @@ function sellerPromoView() {
     <div class="seller-table-wrap">
       <div class="section-head" style="margin-top:0">
         <div>
-          <h2 style="font-size:18px">Быстрое управление всеми товарами (${visibleRows.length})</h2>
-          <p class="muted small" style="margin:2px 0 0">Переключайте класс в один клик — изменения сразу видны в «Живой выдаче» и у покупателя</p>
+          <h2 style="font-size:18px">Управление ставками CPO по всем товарам (${visibleRows.length})</h2>
+          <p class="muted small" style="margin:2px 0 0">Подключение бесплатно — процент списывается только при реальном заказе покупателя</p>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button type="button" class="offer-tab" data-action="sellerCatFilter" data-id="all" aria-pressed="${state.sellerCatFilter === 'all'}">Все (${products.length})</button>
@@ -1175,6 +1198,7 @@ function sellerPromoView() {
       ${visibleRows.map(p => {
         const tier = p.promoTier || 0;
         const pos = allRankMap.get(p.id);
+        const fee = cpoFee(p, tier);
         const fxClass = state.lastUpgraded && state.lastUpgraded.id === p.id ? `just-upgraded-${state.lastUpgraded.tier}` : '';
         return `<div class="seller-product-row ${fxClass}">
           <img class="seller-thumb" src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="">
@@ -1182,13 +1206,16 @@ function sellerPromoView() {
             <div style="font-weight:700">${clean(p.name)}</div>
             <div class="muted small">${categories[p.category]} · ${clean(p.color)} · Общая выдача: <strong>#${pos}</strong></div>
           </div>
-          <div><strong>${rub(p.price)}</strong><div class="muted small">★ ${p.rating}</div></div>
+          <div>
+            <strong>${rub(p.price)}</strong>
+            <div class="muted small">${tier ? `${rub(fee)} / зак.` : '0 ₽ / зак.'}</div>
+          </div>
           <div><span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span></div>
           <div class="tier-switcher">
-            <button type="button" class="tier-chip-btn ${tier === 0 ? 'active-0' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="0">Без</button>
-            <button type="button" class="tier-chip-btn ${tier === 3 ? 'active-3' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="3">3 кл · 100₽</button>
-            <button type="button" class="tier-chip-btn ${tier === 2 ? 'active-2' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="2">2 кл · 150₽</button>
-            <button type="button" class="tier-chip-btn ${tier === 1 ? 'active-1' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="1">👑 1 кл · 300₽</button>
+            <button type="button" class="tier-chip-btn ${tier === 0 ? 'active-0' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="0">0%</button>
+            <button type="button" class="tier-chip-btn ${tier === 3 ? 'active-3' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="3">3 кл · 6%</button>
+            <button type="button" class="tier-chip-btn ${tier === 2 ? 'active-2' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="2">2 кл · 9%</button>
+            <button type="button" class="tier-chip-btn ${tier === 1 ? 'active-1' : ''}" data-action="buyTier" data-id="${p.id}" data-tier="1">👑 1 кл · 12%</button>
           </div>
         </div>`;
       }).join('')}
@@ -1209,7 +1236,7 @@ function sellerLiveView() {
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
         <div>
           <h2 style="margin:0;font-size:20px">Инспектор живой выдачи (вид для селлера)</h2>
-          <p class="muted small" style="margin:3px 0 0">Показывает реальные позиции, баллы релевантности и классы продвижения — покупатели эти плашки не видят.</p>
+          <p class="muted small" style="margin:3px 0 0">Показывает позиции, релевантность и ставки CPO (6% / 9% / 12%) — покупатели эти плашки не видят.</p>
         </div>
         <button type="button" class="btn subtle" data-action="setMode" data-id="buyer">Посмотреть глазами покупателя →</button>
       </div>
@@ -1218,13 +1245,13 @@ function sellerLiveView() {
         <strong>Формула выдачи:</strong>
         <span class="oz-pill" style="background:#eef4ff;color:#005bff">Релевантность запроса</span>
         <span>›</span>
-        <span class="oz-pill tier-1">👑 1 класс (300 ₽)</span>
+        <span class="oz-pill tier-1">👑 1 класс (12% CPO)</span>
         <span>›</span>
-        <span class="oz-pill tier-2">⚡ 2 класс (150 ₽)</span>
+        <span class="oz-pill tier-2">⚡ 2 класс (9% CPO)</span>
         <span>›</span>
-        <span class="oz-pill tier-3">🚀 3 класс (100 ₽)</span>
+        <span class="oz-pill tier-3">🚀 3 класс (6% CPO)</span>
         <span>›</span>
-        <span class="oz-pill tier-0">Органика</span>
+        <span class="oz-pill tier-0">Органика (0%)</span>
       </div>
 
       <div class="inspector-search-row">
@@ -1236,10 +1263,10 @@ function sellerLiveView() {
         </select>
         <select id="liveTierFilter" class="oz-select" style="width:auto;min-width:165px">
           <option value="all" ${state.liveTierFilter === 'all' ? 'selected' : ''}>Все классы</option>
-          <option value="1" ${state.liveTierFilter === '1' ? 'selected' : ''}>1 класс</option>
-          <option value="2" ${state.liveTierFilter === '2' ? 'selected' : ''}>2 класс</option>
-          <option value="3" ${state.liveTierFilter === '3' ? 'selected' : ''}>3 класс</option>
-          <option value="0" ${state.liveTierFilter === '0' ? 'selected' : ''}>Без продвижения</option>
+          <option value="1" ${state.liveTierFilter === '1' ? 'selected' : ''}>1 класс (12%)</option>
+          <option value="2" ${state.liveTierFilter === '2' ? 'selected' : ''}>2 класс (9%)</option>
+          <option value="3" ${state.liveTierFilter === '3' ? 'selected' : ''}>3 класс (6%)</option>
+          <option value="0" ${state.liveTierFilter === '0' ? 'selected' : ''}>Органика (0%)</option>
         </select>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${['', 'худи', 'толстовка', 'джинсы', 'чёрные', 'утеплённые'].map(q => `<button type="button" class="offer-tab" data-action="setLiveQuery" data-id="${q}" aria-pressed="${state.liveQuery === q}">${q || 'Все'}</button>`).join('')}
@@ -1259,7 +1286,7 @@ function sellerAnalyticsView() {
   const totalOrders = rows.reduce((s, r) => s + r.eco.orders, 0);
   const totalRev = rows.reduce((s, r) => s + r.eco.revenue, 0);
   const totalAdCost = rows.reduce((s, r) => s + r.eco.cost, 0);
-  const avgDRR = totalRev > 0 ? ((totalAdCost / totalRev) * 100).toFixed(2) : '0.00';
+  const avgDRR = totalRev > 0 ? ((totalAdCost / totalRev) * 100).toFixed(1) : '0.0';
 
   const byTier = [1, 2, 3, 0].map(t => {
     const group = rows.filter(r => (r.p.promoTier || 0) === t);
@@ -1307,21 +1334,21 @@ function sellerAnalyticsView() {
         <span class="kpi-sub">Средний CTR ${(rows.reduce((s, r) => s + r.eco.clicks, 0) / Math.max(1, totalViews) * 100).toFixed(1)}%</span>
       </div>
       <div class="seller-kpi">
-        <small>Активный бюджет подписок</small>
+        <small>Прогноз расхода CPO (7 дней)</small>
         <strong>${rub(totalAdCost)}</strong>
-        <span class="kpi-sub">Всего вложено: ${rub(state.sellerSpent)}</span>
+        <span class="kpi-sub">Факт списано с заказов: ${rub(state.sellerSpent)}</span>
       </div>
       <div class="seller-kpi">
-        <small>ДРР (доля рекламных расходов)</small>
+        <small>Средний ДРР по магазину</small>
         <strong>${avgDRR}%</strong>
-        <span class="kpi-sub">${Number(avgDRR) < 3 ? 'Отличная окупаемость' : 'В пределах нормы'}</span>
+        <span class="kpi-sub">${Number(avgDRR) <= 10 ? 'Эффективнее рынка Ozon (10–15%)' : 'В пределах нормы Ozon'}</span>
       </div>
     </section>
 
     <section class="analytics-grid">
       <div class="chart-card">
         <h3>Динамика показов за 7 дней</h3>
-        <p class="muted small" style="margin:0 0 12px">Пересчитывается автоматически при покупке 1, 2 или 3 класса</p>
+        <p class="muted small" style="margin:0 0 12px">Пересчитывается автоматически при изменении ставок 6% / 9% / 12%</p>
         <svg viewBox="0 0 600 210" style="width:100%;height:auto;display:block">
           <defs>
             <linearGradient id="ozAreaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1343,8 +1370,8 @@ function sellerAnalyticsView() {
       </div>
 
       <div class="chart-card">
-        <h3>Вклад уровней продвижения в выручку</h3>
-        <p class="muted small" style="margin:0">Сравнение эффективности 1, 2, 3 классов и органики</p>
+        <h3>Вклад уровней CPO в выручку</h3>
+        <p class="muted small" style="margin:0">Сравнение эффективности ставок 12%, 9%, 6% и органики</p>
         <div class="bar-list">
           ${byTier.map(b => {
             const pct = Math.round((b.revenue / maxTierRev) * 100);
@@ -1363,15 +1390,39 @@ function sellerAnalyticsView() {
           ${catStats.map(c => `<div style="background:var(--oz-surface-soft);padding:10px 12px;border-radius:12px">
             <div class="small muted">${c.title}</div>
             <strong style="font-size:16px">${rub(c.revenue)}</strong>
-            <div class="small" style="color:var(--oz-blue)">${c.promoted} из ${c.count} в бусте · ${c.orders} зак.</div>
+            <div class="small" style="color:var(--oz-blue)">${c.promoted} из ${c.count} на CPO · ${c.orders} зак.</div>
           </div>`).join('')}
         </div>
       </div>
     </section>
 
+    <section class="block">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div>
+          <h3 style="margin:0;font-size:16px">Реальные списания CPO с заказов покупателей (${state.cpoEvents.length})</h3>
+          <span class="muted small">Оформите заказ в режиме покупателя или нажмите «Симулировать заказ» — комиссия спишется автоматически</span>
+        </div>
+        <button type="button" class="btn subtle" style="padding:7px 12px;font-size:12.5px" data-action="setMode" data-id="buyer">Сделать заказ как покупатель →</button>
+      </div>
+      ${state.cpoEvents.length ? `
+        <table class="sku-analytics-table">
+          <thead><tr><th>Время</th><th>Товар</th><th>Сумма заказа</th><th>Ставка CPO</th><th>Списано с баланса</th></tr></thead>
+          <tbody>
+            ${state.cpoEvents.slice(0, 6).map(ev => `<tr>
+              <td class="muted">${clean(ev.time)}</td>
+              <td><strong>${clean(ev.product)}</strong> × ${ev.qty}</td>
+              <td>${rub(ev.orderSum)}</td>
+              <td><span class="oz-pill tier-${ev.tier}">${ev.ratePct}%</span></td>
+              <td style="color:var(--oz-magenta);font-weight:700">−${rub(ev.fee)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      ` : '<p class="muted small" style="margin:6px 0 0">Пока нет фактических списаний — баланс <strong>' + rub(state.sellerBalance) + '</strong> не расходуется, пока нет заказов.</p>'}
+    </section>
+
     <section class="seller-table-wrap">
       <div class="section-head" style="margin-top:0">
-        <h2 style="font-size:18px">Юнит-экономика и рекомендации по SKU</h2>
+        <h2 style="font-size:18px">Юнит-экономика CPO и рекомендации по SKU</h2>
         <span class="muted small">Сортировка по прогнозу выручки</span>
       </div>
       <table class="sku-analytics-table">
@@ -1379,10 +1430,10 @@ function sellerAnalyticsView() {
           <tr>
             <th>Товар</th>
             <th>Категория</th>
-            <th>Класс</th>
-            <th>Показы / Клики</th>
-            <th>Заказы</th>
-            <th>Расход / ДРР</th>
+            <th>Ставка CPO</th>
+            <th>За 1 заказ</th>
+            <th>Прогноз заказов</th>
+            <th>Расход CPO (7 дн.)</th>
             <th>Прогноз выручки</th>
             <th>Рекомендация</th>
           </tr>
@@ -1391,17 +1442,17 @@ function sellerAnalyticsView() {
           ${rows.sort((a, b) => b.eco.revenue - a.eco.revenue).map(({ p, eco }) => {
             const tier = p.promoTier || 0;
             const rec = tier === 0
-              ? `<button type="button" class="btn" style="padding:5px 10px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="3">Поднять в 3 кл · 100₽</button>`
+              ? `<button type="button" class="btn" style="padding:5px 10px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="3">Подключить 6%</button>`
               : tier > 1 && p.rating >= 4.9
-                ? `<button type="button" class="btn primary" style="padding:5px 10px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="1">В 1 класс · 300₽</button>`
+                ? `<button type="button" class="btn primary" style="padding:5px 10px;font-size:12px" data-action="buyTier" data-id="${p.id}" data-tier="1">В Топ · 12%</button>`
                 : '<span class="roi-good">✓ Оптимально</span>';
             return `<tr>
               <td><strong>${clean(p.name)}</strong></td>
               <td class="muted">${categories[p.category]}</td>
               <td><span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span></td>
-              <td>${currency.format(eco.views)} / ${eco.clicks}</td>
+              <td>${tier ? rub(eco.feePerOrder) : '0 ₽'}</td>
               <td><strong>${eco.orders}</strong></td>
-              <td>${rub(eco.cost)} <span class="muted">(${eco.drr.toFixed(1)}%)</span></td>
+              <td>${rub(eco.cost)} <span class="muted">(${eco.drr}%)</span></td>
               <td><strong>${rub(eco.revenue)}</strong></td>
               <td>${rec}</td>
             </tr>`;
@@ -1426,12 +1477,12 @@ function sellerProductsView() {
         <label class="small muted">Название товара<input class="oz-input" name="name" required placeholder="Худи оверсайз с капюшоном"></label>
         <label class="small muted">Цвет<input class="oz-input" name="color" required placeholder="Чёрные"></label>
         <label class="small muted">Цена, ₽<input class="oz-input" name="price" type="number" min="100" value="2590" required></label>
-        <label class="small muted">Стартовый класс
+        <label class="small muted">Стартовая ставка CPO
           <select class="oz-select" name="promoTier">
-            <option value="0">Без продвижения (0 ₽)</option>
-            <option value="3">3 класс · Старт (100 ₽)</option>
-            <option value="2">2 класс · Бизнес (150 ₽)</option>
-            <option value="1">1 класс · Премиум (300 ₽)</option>
+            <option value="0">Органика (0% с заказа)</option>
+            <option value="3">3 класс · Старт (6% с заказа)</option>
+            <option value="2">2 класс · Буст (9% с заказа)</option>
+            <option value="1">1 класс · Топ (12% с заказа)</option>
           </select>
         </label>
         <button type="submit" class="btn primary" style="height:38px">Опубликовать SKU</button>
@@ -1440,20 +1491,21 @@ function sellerProductsView() {
 
     <div class="seller-table-wrap">
       <h2 style="margin:0 0 12px;font-size:18px">Все товары магазина (${products.length} SKU)</h2>
-      ${products.map(p => `
-        <div class="seller-product-row">
+      ${products.map(p => {
+        const tier = p.promoTier || 0;
+        return `<div class="seller-product-row">
           <img class="seller-thumb" src="${imgFor(p)}" ${imgFallbackAttr(p)} alt="">
           <div>
             <strong>${clean(p.name)}</strong>
-            <div class="muted small">${categories[p.category]} · Арт. ${p.sku} · ${clean(p.color)}</div>
+            <div class="muted small">${categories[p.category]} · Арт. ${p.sku} · CPO: ${tier ? `${PROMO_TIERS[tier].ratePct}% (${rub(cpoFee(p))}/зак.)` : '0%'}</div>
           </div>
           <div><input class="oz-input" style="height:34px" type="number" min="100" value="${p.price}" data-price-edit="${p.id}"></div>
-          <div><span class="oz-pill ${PROMO_TIERS[p.promoTier || 0].colorClass}">${PROMO_TIERS[p.promoTier || 0].code}</span></div>
+          <div><span class="oz-pill ${PROMO_TIERS[tier].colorClass}">${PROMO_TIERS[tier].code}</span></div>
           <div style="display:flex;gap:8px;justify-content:flex-end">
             <button type="button" class="btn" style="padding:7px 12px;font-size:12.5px" data-action="savePrice" data-id="${p.id}">Сохранить цену</button>
           </div>
-        </div>
-      `).join('')}
+        </div>`;
+      }).join('')}
     </div>
   `;
 }
@@ -1606,8 +1658,36 @@ function orders() {
 }
 
 /* =========================================================
-   РЕНДЕР И УПРАВЛЕНИЕ РЕЖИМАМИ
+   СПИСАНИЕ CPO ПРИ ЗАКАЗЕ + РЕНДЕР
    ========================================================= */
+function chargeCpoForItems(items) {
+  let totalCharged = 0;
+  const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  for (const item of items) {
+    const prod = productById(item.product);
+    if (!prod) continue;
+    const tier = prod.promoTier || 0;
+    const meta = PROMO_TIERS[tier];
+    if (!meta || !meta.rate) continue;
+    const qty = item.qty || 1;
+    const orderSum = item.price * qty;
+    const fee = Math.round(orderSum * meta.rate);
+    state.sellerBalance = Math.max(0, state.sellerBalance - fee);
+    state.sellerSpent += fee;
+    totalCharged += fee;
+    state.cpoEvents.unshift({
+      product: prod.name,
+      qty,
+      orderSum,
+      tier,
+      ratePct: meta.ratePct,
+      fee,
+      time: now,
+    });
+  }
+  return totalCharged;
+}
+
 function render() {
   saveSession();
   const isSeller = state.mode === 'seller';
@@ -1622,7 +1702,7 @@ function render() {
   document.querySelector('#modeBuyerBtn').setAttribute('aria-selected', String(!isSeller));
   document.querySelector('#modeSellerBtn').setAttribute('aria-selected', String(isSeller));
   document.querySelector('#modeHint').textContent = isSeller
-    ? 'Кабинет продавца: тарифы 100/150/300 ₽, инспектор выдачи и аналитика'
+    ? 'Кабинет продавца: модель CPO (6% / 9% / 12% с заказа), инспектор выдачи и аналитика'
     : 'Вы смотрите витрину глазами покупателя (без служебных меток продвижения)';
 
   if (isSeller) {
@@ -1687,23 +1767,15 @@ function render() {
 function purchaseTier(productId, newTier) {
   const p = productById(productId);
   if (!p) return;
-  const oldTier = p.promoTier || 0;
-  if (oldTier === newTier) return;
-  const cost = PROMO_TIERS[newTier]?.price || 0;
-  if (cost > 0 && state.sellerBalance < cost) {
-    say('Недостаточно средств — нажмите «+ 500 ₽» в шапке');
-    return;
-  }
-  if (cost > 0) {
-    state.sellerBalance -= cost;
-    state.sellerSpent += cost;
-  }
+  if ((p.promoTier || 0) === newTier) return;
+
   p.promoTier = newTier;
   state.sellerSelectedProduct = p.id;
   state.lastUpgraded = newTier > 0 ? { id: p.id, tier: newTier } : null;
   render();
-  if (newTier > 0) triggerTierPurchaseFX(newTier, p.name);
-  else say(`Продвижение снято для «${p.name}»`);
+
+  if (newTier > 0) triggerTierPurchaseFX(newTier, p);
+  else say(`Ставка CPO отключена (0%) для «${p.name}»`);
   setTimeout(() => { state.lastUpgraded = null; }, 1200);
 }
 
@@ -1752,9 +1824,6 @@ document.addEventListener('submit', e => {
     e.preventDefault();
     const f = new FormData(e.target);
     const tier = Number(f.get('promoTier')) || 0;
-    const cost = PROMO_TIERS[tier]?.price || 0;
-    if (cost > state.sellerBalance) { say('Недостаточно средств на балансе'); return; }
-    if (cost > 0) { state.sellerBalance -= cost; state.sellerSpent += cost; }
     const category = String(f.get('category') || 'hoodies');
     const price = Math.max(100, Number(f.get('price')) || 2490);
     const id = 'custom-' + Date.now();
@@ -1781,7 +1850,7 @@ document.addEventListener('submit', e => {
     products.unshift(newProd);
     state.sellerSelectedProduct = id;
     render();
-    if (tier > 0) triggerTierPurchaseFX(tier, newProd.name);
+    if (tier > 0) triggerTierPurchaseFX(tier, newProd);
     else say(`Товар «${newProd.name}» опубликован`);
   }
 });
@@ -1838,6 +1907,16 @@ document.addEventListener('click', e => {
     case 'setLiveQuery': state.liveQuery = id; render(); break;
     case 'topup': state.sellerBalance += 500; render(); say('Баланс пополнен на 500 ₽'); break;
     case 'buyTier': purchaseTier(id, Number(b.dataset.tier)); break;
+    case 'simOrder': {
+      const targetProd = productById(id);
+      if (!targetProd) break;
+      const tier = targetProd.promoTier || 0;
+      const charged = chargeCpoForItems([{ product: targetProd.id, price: targetProd.price, qty: 1 }]);
+      render();
+      if (charged > 0) say(`Симуляция заказа: списано ${rub(charged)} (${PROMO_TIERS[tier].ratePct}% CPO)`);
+      else say('Симуляция заказа: органика (0 ₽ списания CPO)');
+      break;
+    }
     case 'savePrice': {
       const inp = document.querySelector(`[data-price-edit="${id}"]`);
       const targetProd = productById(id);
@@ -1940,6 +2019,7 @@ document.addEventListener('click', e => {
     case 'checkout': if (state.cart.length) go('checkout'); break;
     case 'confirm':
       if (state.cart.length) {
+        chargeCpoForItems(state.cart);
         state.order = state.cart.map(x => ({ ...x }));
         state.orders.unshift({ items: state.cart.map(x => ({ ...x })), status: 'Заказ оформлен' });
         for (const x of state.cart) if (x.id) state.reserved.add(x.id);
