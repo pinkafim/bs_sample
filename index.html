@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Ozon — маркетплейс и кабинет продавца Ozon Seller.">
 <title>Ozon — маркетплейс</title>
-<link rel="stylesheet" href="styles.css?v=ozon6">
+<link rel="stylesheet" href="styles.css?v=ozon7">
 </head>
 <body>
 
@@ -97,6 +97,11 @@
 
   <nav class="oz-subnav" aria-label="Разделы Ozon">
     <div class="oz-subnav-links">
+      <a class="oz-subnav-link is-nearby-pill" href="#/nearby" data-action="nearby">
+        <span class="nearby-live-dot" aria-hidden="true"></span>
+        <span>Товары рядом</span>
+        <b class="nearby-nav-badge" id="nearbyNavCount">0</b>
+      </a>
       <span class="oz-subnav-item is-fresh">
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M6.461 4.163c2.258 0 3.108 1.318 3.74 2.297.372.577.668 1.036 1.132 1.036 1.25 0 3.333.833 3.333 3.03 0 3.22-2.724 5.303-6.153 5.303-3.43 0-7.18-1.667-7.18-6.25 0-2.783 2.052-5.416 5.128-5.416M7.295.19c.452-.47 2.83-.109 4.038 1.472.704.92.81 2.358.825 3.329l.004.169c.017.615.025.94-.834.38-.767-.501-1.88-1.542-2.497-2.228C7.638 1.99 6.844.661 7.295.191"/></svg>
         Ozon fresh
@@ -105,10 +110,6 @@
       <a class="oz-subnav-link" href="#/search?category=jeans" data-action="category" data-id="jeans">Джинсы</a>
       <a class="oz-subnav-link" href="#/search?category=hoodies" data-action="category" data-id="hoodies">Толстовки и худи</a>
       <a class="oz-subnav-link" href="#/search" data-action="category" data-id="">Все товары</a>
-      <a class="oz-subnav-link is-nearby" href="#/nearby" data-action="nearby">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3c-4.5 0-8 3-8 8 0 6 6.5 10 8 10s8-4 8-10c0-5-3.5-8-8-8m0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg>
-        Товары рядом
-      </a>
     </div>
 
     <div class="oz-subnav-right">
@@ -150,6 +151,10 @@
     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7"/></svg>
     <span>Главная</span>
   </a>
+  <a href="#/nearby" data-action="nearby" class="is-nearby-mobile">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3c-4.5 0-8 3-8 8 0 6 6.5 10 8 10s8-4 8-10c0-5-3.5-8-8-8m0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg>
+    <span>Рядом</span>
+  </a>
   <a href="#/search" data-action="category" data-id="">
     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7.556C4 4.628 4.628 4 7.556 4s3.555.628 3.555 3.556-.627 3.555-3.555 3.555S4 10.484 4 7.556m0 8.888c0-2.928.628-3.555 3.556-3.555s3.555.627 3.555 3.555S10.484 20 7.556 20 4 19.372 4 16.444M16.444 4c-2.928 0-3.555.628-3.555 3.556s.627 3.555 3.555 3.555S20 10.484 20 7.556 19.372 4 16.444 4m-3.555 12.444c0-2.928.627-3.555 3.555-3.555S20 13.516 20 16.444 19.372 20 16.444 20s-3.555-.628-3.555-3.556"/></svg>
     <span>Каталог</span>
@@ -176,7 +181,7 @@
   </div>
 </footer>
 
-<script src="app.js?v=ozon6"></script>
+<script src="app.js?v=ozon7"></script>
 </body>
 </html>
 

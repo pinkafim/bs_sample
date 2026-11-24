@@ -1151,3 +1151,143 @@ body.checkout-mode .checkout-header-title { display: block; }
   .mobile-bar a[aria-current="page"] { color: var(--oz-blue); }
 }
 
+/* =========================================================
+   НЕНАВЯЗЧИВЫЙ АКЦЕНТ НА «ТОВАРЫ РЯДОМ»
+   ========================================================= */
+.oz-subnav-link.is-nearby-pill {
+  background: rgba(16, 196, 76, 0.1);
+  color: #0b8a36;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 99px;
+  border: 1px solid rgba(16, 196, 76, 0.24);
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.oz-subnav-link.is-nearby-pill:hover,
+.oz-subnav-link.is-nearby-pill[aria-current="page"] {
+  background: rgba(16, 196, 76, 0.18);
+  border-color: rgba(16, 196, 76, 0.44);
+  color: #09732c;
+}
+.nearby-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--oz-green);
+  box-shadow: 0 0 0 3px rgba(16, 196, 76, 0.22);
+  flex: 0 0 auto;
+}
+.nearby-nav-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  background: rgba(16, 196, 76, 0.18);
+  color: #09732c;
+  padding: 1px 6px;
+  border-radius: 99px;
+  line-height: 1.35;
+}
+
+/* Полка «Товары рядом» на главной странице */
+.oz-nearby-shelf {
+  background: linear-gradient(180deg, #f3fcf6 0%, #ffffff 100%);
+  border: 1px solid rgba(16, 196, 76, 0.22);
+  border-radius: 22px;
+  padding: 18px 20px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 18px rgba(16, 196, 76, 0.06);
+}
+.oz-nearby-shelf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.oz-nearby-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.oz-nearby-title-wrap h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+.oz-nearby-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0b8a36;
+  background: rgba(16, 196, 76, 0.12);
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+.oz-nearby-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.oz-nearby-point-select {
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 196, 76, 0.32);
+  background: #fff;
+  padding: 0 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--oz-text);
+}
+
+/* Карточка-баннер «Товары рядом» на главной */
+.oz-cat-banner.is-nearby-banner {
+  background: linear-gradient(135deg, #f2fcf5 0%, #ffffff 100%);
+  border: 1px solid rgba(16, 196, 76, 0.26);
+}
+.oz-cat-banner.is-nearby-banner .oz-cat-emoji {
+  background: rgba(16, 196, 76, 0.14);
+}
+
+/* Мягкий акцент кнопки для товаров, которые уже в ПВЗ */
+.oz-card-cta.is-nearby-cta {
+  background: #0ea64b;
+}
+.oz-card-cta.is-nearby-cta:hover {
+  background: #0c8f40;
+}
+
+/* Шапка страницы «Товары рядом» */
+.nearby-hero-strip {
+  background: linear-gradient(135deg, #effbf3 0%, #ffffff 100%);
+  border: 1px solid rgba(16, 196, 76, 0.24);
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.nearby-hero-strip h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+}
+.nearby-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+/* Мобильная панель на 5 пунктов (с пунктом «Рядом») */
+@media (max-width: 960px) {
+  .mobile-bar { grid-template-columns: repeat(5, 1fr); }
+  .mobile-bar a.is-nearby-mobile { color: #0b8a36; }
+}

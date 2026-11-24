@@ -1,19 +1,20 @@
 'use strict';
 
-/* Встроенный SVG-фолбэк на случай офлайна для фото толстовок */
-function hoodieSvg(fill, accent, label) {
+/* Встроенный SVG-фолбэк на случай офлайна */
+function garmentSvg(kind, fill, accent, label) {
+  const shape = kind === 'jeans'
+    ? `<path d="M126 76h108l14 316h-48l-20-182-20 182h-48z" fill="${fill}" stroke="#cbd5e1" stroke-width="4"/><path d="M130 112h100" stroke="${accent}" stroke-width="4" stroke-dasharray="8 6"/>`
+    : `<path d="M126 112c16-24 92-24 108 0l44 26 24 114-42 16-14-64v178H114V204l-14 64-42-16 24-114z" fill="${fill}" stroke="#cbd5e1" stroke-width="4"/><path d="M142 114c12 34 64 34 76 0" fill="none" stroke="${accent}" stroke-width="6" stroke-linecap="round"/><path d="M138 278h84v54c0 10-8 18-18 18h-48c-10 0-18-8-18-18z" fill="${accent}" opacity="0.28"/>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 480">
     <rect width="360" height="480" fill="#eef2f7"/>
-    <path d="M126 112c16-24 92-24 108 0l44 26 24 114-42 16-14-64v178H114V204l-14 64-42-16 24-114z" fill="${fill}" stroke="#cbd5e1" stroke-width="4"/>
-    <path d="M142 114c12 34 64 34 76 0" fill="none" stroke="${accent}" stroke-width="6" stroke-linecap="round"/>
-    <path d="M138 278h84v54c0 10-8 18-18 18h-48c-10 0-18-8-18-18z" fill="${accent}" opacity="0.28"/>
-    <text x="180" y="438" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#475569">${label}</text>
+    ${shape}
+    <text x="180" y="442" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#475569">${label}</text>
   </svg>`;
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
 
 const imageUrls = {
-  // Джинсы (локальные файлы)
+  // Джинсы (локальные)
   classic: 'images/classic.webp',
   washed: 'images/washed.webp',
   straight: 'images/straight.webp',
@@ -28,22 +29,39 @@ const imageUrls = {
   cable: 'images/cable.webp',
   sneakers: 'images/sneakers.webp',
   denim: 'images/denim.webp',
-  // Толстовки и худи (из приложенных страниц Ozon + SVG fallback при отсутствии сети)
+  // Новые джинсы из приложенного файла
+  j_bigar: 'https://ir.ozone.ru/s3/multimedia-1-6/wc500/7448512362.jpg',
+  j_marcopolo: 'https://ir.ozone.ru/s3/multimedia-1-m/wc500/14907470350.jpg',
+  j_diagonal: 'https://ir.ozone.ru/s3/multimedia-1-7/wc500/12922119691.jpg',
+  j_justdenim: garmentSvg('jeans', '#1e293b', '#60a5fa', 'JUST DENIM ЗИМА'),
+
+  // Толстовки и худи (из приложенных файлов)
   h_veneziani: 'https://ir.ozone.ru/s3/multimedia-1-b/wc500/21229350275.jpg',
   h_club: 'https://ir.ozone.ru/s3/multimedia-1-p/wc500/20684084317.jpg',
   h_hoodie_dv: 'https://ir.ozone.ru/s3/multimedia-1-m/wc500/20946362998.jpg',
   h_milk: 'https://ir.ozone.ru/s3/multimedia-1-v/wc500/21154828207.jpg',
-  h_zip: hoodieSvg('#1e293b', '#64748b', 'ЗИП-ХУДИ'),
-  h_oversize: hoodieSvg('#94a3b8', '#475569', 'ХУДИ ОВЕРСАЙЗ'),
-  h_sand: hoodieSvg('#d6cbb8', '#8b7d6b', 'СВИТШОТ БАЗОВЫЙ'),
-  h_navy: hoodieSvg('#1e3a5f', '#60a5fa', 'ТОЛСТОВКА ФЛИС'),
+  h_tvoe: 'https://ir.ozone.ru/s3/multimedia-1-1/wc500/14284553221.jpg',
+  h_hood_cap: 'https://ir.ozone.ru/s3/multimedia-1-j/wc500/14223854323.jpg',
+  h_naches: 'https://ir.ozone.ru/s3/multimedia-1-l/wc500/15303800397.jpg',
+  h_champion: 'https://ir.ozone.ru/s3/multimedia-r/wc500/6367229187.jpg',
+  h_zip: garmentSvg('hoodie', '#1e293b', '#64748b', 'ЗИП-ХУДИ'),
+  h_oversize: garmentSvg('hoodie', '#94a3b8', '#475569', 'ХУДИ ОВЕРСАЙЗ'),
+  h_sand: garmentSvg('hoodie', '#d6cbb8', '#8b7d6b', 'СВИТШОТ БАЗОВЫЙ'),
+  h_navy: garmentSvg('hoodie', '#1e3a5f', '#60a5fa', 'ТОЛСТОВКА ФЛИС'),
 };
 
-const fallbackHoodieByKey = {
-  h_veneziani: hoodieSvg('#18181b', '#52525b', 'DON VENEZIANI'),
-  h_club: hoodieSvg('#111827', '#4b5563', 'CLUB HOODIE'),
-  h_hoodie_dv: hoodieSvg('#334155', '#94a3b8', 'ХУДИ ОВЕРСАЙЗ'),
-  h_milk: hoodieSvg('#f3efe6', '#c8bfa8', 'ХУДИ МОЛОЧНЫЙ'),
+const fallbackImgByKey = {
+  j_bigar: garmentSvg('jeans', '#334155', '#94a3b8', 'BIGAR БАНАНЫ'),
+  j_marcopolo: garmentSvg('jeans', '#1e3a5f', '#93c5fd', 'MARC O POLO'),
+  j_diagonal: garmentSvg('jeans', '#18181b', '#71717a', 'ДИАГОНАЛЬ'),
+  h_veneziani: garmentSvg('hoodie', '#18181b', '#52525b', 'DON VENEZIANI'),
+  h_club: garmentSvg('hoodie', '#111827', '#4b5563', 'CLUB HOODIE'),
+  h_hoodie_dv: garmentSvg('hoodie', '#334155', '#94a3b8', 'ХУДИ ОВЕРСАЙЗ'),
+  h_milk: garmentSvg('hoodie', '#f3efe6', '#c8bfa8', 'ХУДИ МОЛОЧНЫЙ'),
+  h_tvoe: garmentSvg('hoodie', '#1f2937', '#6b7280', 'ХУДИ ТВОЕ'),
+  h_hood_cap: garmentSvg('hoodie', '#475569', '#94a3b8', 'ТОЛСТОВКА'),
+  h_naches: garmentSvg('hoodie', '#27272a', '#a1a1aa', 'ХУДИ С НАЧЁСОМ'),
+  h_champion: garmentSvg('hoodie', '#1d4ed8', '#93c5fd', 'CHAMPION'),
 };
 
 const points = {
@@ -56,22 +74,14 @@ const categories = {
   hoodies: 'Толстовки и худи',
 };
 
-/* 3 уровня продвижения с реалистичными ценами: 100 / 150 / 300 ₽ */
+/* 3 уровня продвижения: 100 / 150 / 300 ₽ */
 const PROMO_TIERS = {
   1: {
-    tier: 1,
-    rank: 1,
-    code: '1 класс',
-    name: 'Первый класс',
+    tier: 1, rank: 1, code: '1 класс', name: 'Первый класс',
     subtitle: 'Максимальный приоритет в выдаче',
-    price: 300,
-    boostLabel: '+300% к показам',
-    viewsMult: 4.0,
-    ctr: 0.068,
-    cr: 0.095,
-    stars: '★★★',
-    badge: '1 класс · Топ',
-    colorClass: 'tier-1',
+    price: 300, boostLabel: '+300% к показам',
+    viewsMult: 4.0, ctr: 0.068, cr: 0.095,
+    stars: '★★★', badge: '1 класс · Топ', colorClass: 'tier-1',
     perks: [
       'Топ выдачи внутри своей группы релевантности',
       'Премиум-корона на кнопке карточки у покупателей',
@@ -79,19 +89,11 @@ const PROMO_TIERS = {
     ],
   },
   2: {
-    tier: 2,
-    rank: 2,
-    code: '2 класс',
-    name: 'Второй класс',
+    tier: 2, rank: 2, code: '2 класс', name: 'Второй класс',
     subtitle: 'Ускорение выше 3 класса и органики',
-    price: 150,
-    boostLabel: '+130% к показам',
-    viewsMult: 2.3,
-    ctr: 0.052,
-    cr: 0.082,
-    stars: '★★',
-    badge: '2 класс · Буст',
-    colorClass: 'tier-2',
+    price: 150, boostLabel: '+130% к показам',
+    viewsMult: 2.3, ctr: 0.052, cr: 0.082,
+    stars: '★★', badge: '2 класс · Буст', colorClass: 'tier-2',
     perks: [
       'Вывод выше 3 класса и товаров без продвижения',
       'Оптимальный баланс стоимости (150 ₽) и охвата',
@@ -99,19 +101,11 @@ const PROMO_TIERS = {
     ],
   },
   3: {
-    tier: 3,
-    rank: 3,
-    code: '3 класс',
-    name: 'Третий класс',
+    tier: 3, rank: 3, code: '3 класс', name: 'Третий класс',
     subtitle: 'Стартовое поднятие над органикой',
-    price: 100,
-    boostLabel: '+55% к показам',
-    viewsMult: 1.55,
-    ctr: 0.041,
-    cr: 0.072,
-    stars: '★',
-    badge: '3 класс · Старт',
-    colorClass: 'tier-3',
+    price: 100, boostLabel: '+55% к показам',
+    viewsMult: 1.55, ctr: 0.041, cr: 0.072,
+    stars: '★', badge: '3 класс · Старт', colorClass: 'tier-3',
     perks: [
       'Приоритет над всеми товарами без продвижения',
       'Доступная цена 100 ₽ для теста новых карточек',
@@ -119,19 +113,11 @@ const PROMO_TIERS = {
     ],
   },
   0: {
-    tier: 0,
-    rank: 4,
-    code: 'Без продвижения',
-    name: 'Органика',
+    tier: 0, rank: 4, code: 'Без продвижения', name: 'Органика',
     subtitle: 'Базовая выдача',
-    price: 0,
-    boostLabel: 'Базовые показы',
-    viewsMult: 1.0,
-    ctr: 0.031,
-    cr: 0.062,
-    stars: '—',
-    badge: 'Органика',
-    colorClass: 'tier-0',
+    price: 0, boostLabel: 'Базовые показы',
+    viewsMult: 1.0, ctr: 0.031, cr: 0.062,
+    stars: '—', badge: 'Органика', colorClass: 'tier-0',
     perks: ['Обычное размещение после товаров 1, 2 и 3 класса'],
   },
 };
@@ -141,6 +127,10 @@ const defaultProducts = [
   { id: 'classic', sku: '601284101', category: 'jeans', name: 'Джинсы утеплённые с флисом', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 6990, cheap: 2290, recent: 1, rating: 4.8, reviews: 735, left: 14, verified: true, seller: 'Denim Store', tags: ['джинсы', 'брюки', 'утепленные', 'флис'], promoTier: 2 },
   { id: 'washed', sku: '601284102', category: 'jeans', name: 'Джинсы широкие свободного кроя', color: 'Графитовые', sizes: ['S', 'M', 'L', 'XL'], price: 3190, oldPrice: 8400, cheap: 2790, recent: 2, rating: 4.9, reviews: 2140, left: 9, verified: true, seller: 'Denim Store', tags: ['джинсы', 'оверсайз', 'широкие'], promoTier: 1 },
   { id: 'straight', sku: '601284103', category: 'jeans', name: 'Джинсы прямые классические', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 3590, oldPrice: 7800, cheap: 3290, recent: 3, rating: 4.9, reviews: 1660, left: 24, verified: true, seller: 'Denim Store', tags: ['джинсы', 'прямые'], promoTier: 2 },
+  { id: 'j_bigar', sku: '200817351', category: 'jeans', name: 'Джинсы BIGAR мужские бананы', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 2863, oldPrice: 5490, cheap: 2650, recent: 23, rating: 4.9, reviews: 28631, left: 11, verified: true, seller: 'BIGAR Official', tags: ['джинсы', 'бананы', 'мужские'], promoTier: 1 },
+  { id: 'j_diagonal', sku: '518567521', category: 'jeans', name: 'Джинсы Диагональ широкие', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 3199, oldPrice: 23433, cheap: 2950, recent: 24, rating: 4.9, reviews: 1692, left: 15, verified: true, seller: 'Диагональ', tags: ['джинсы', 'черные', 'широкие'], promoTier: 2 },
+  { id: 'j_justdenim', sku: '575476478', category: 'jeans', name: 'Джинсы JUST DENIM зимние утеплённые', color: 'Тёмно-синие', sizes: ['S', 'M', 'L', 'XL'], price: 3490, oldPrice: 7990, cheap: 3190, recent: 25, rating: 4.8, reviews: 840, left: 8, verified: true, seller: 'JUST DENIM', tags: ['джинсы', 'утепленные', 'зимние', 'флис'], promoTier: 3 },
+  { id: 'j_marcopolo', sku: '575126166', category: 'jeans', name: "Джинсы Marc O'Polo Sjöbo Shaped Fit", color: 'Индиго', sizes: ['M', 'L', 'XL'], price: 16480, oldPrice: 16990, cheap: 15900, recent: 26, rating: 5.0, reviews: 2, left: 2, verified: true, seller: "Marc O'Polo", tags: ['джинсы', 'прямые', 'премиум'], promoTier: 0 },
   { id: 'shirt', sku: '601284104', category: 'jeans', name: 'Джинсы багги из плотного денима', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2490, oldPrice: 6700, cheap: 2190, recent: 4, rating: 4.8, reviews: 985, left: 31, verified: true, seller: 'Denim Store', tags: ['джинсы', 'багги', 'черные', 'оверсайз'], promoTier: 3 },
   { id: 'socks', sku: '601284105', category: 'jeans', name: 'Джинсы свободные с потёртостями', color: 'Голубые', sizes: ['S', 'M', 'L', 'XL'], price: 2890, oldPrice: 6200, cheap: 2590, recent: 5, rating: 4.9, reviews: 520, left: 45, verified: false, seller: 'Denim Store', tags: ['джинсы', 'свободные'], promoTier: 0 },
   { id: 'ivory', sku: '601284106', category: 'jeans', name: 'Джинсы бананы', color: 'Светло-голубые', sizes: ['S', 'M', 'L', 'XL'], price: 2690, oldPrice: 6500, cheap: 2390, recent: 6, rating: 4.9, reviews: 4120, left: 19, verified: true, seller: 'Denim Store', tags: ['джинсы', 'бананы'], promoTier: 3 },
@@ -154,10 +144,14 @@ const defaultProducts = [
   { id: 'denim', sku: '601284114', category: 'jeans', name: 'Джинсы широкие с высокой посадкой', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2990, oldPrice: 9200, cheap: 2690, recent: 14, rating: 4.9, reviews: 5401, left: 6, verified: true, seller: 'Denim Store', tags: ['джинсы', 'черные', 'широкие'], promoTier: 1 },
 
   // КАТЕГОРИЯ: ТОЛСТОВКИ И ХУДИ
-  { id: 'h_veneziani', sku: '702481372', category: 'hoodies', name: 'Толстовка DON VENEZIANI с капюшоном', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2190, oldPrice: 7900, cheap: 1990, recent: 15, rating: 4.9, reviews: 148, left: 8, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'черные', 'кофта'], promoTier: 1 },
+  { id: 'h_tvoe', sku: '352473808', category: 'hoodies', name: 'Худи ТВОЕ Базовая', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 1229, oldPrice: 3699, cheap: 1150, recent: 27, rating: 4.8, reviews: 3071, left: 108, verified: true, seller: 'ТВОЕ', tags: ['толстовка', 'худи', 'черные', 'базовая'], promoTier: 1 },
+  { id: 'h_naches', sku: '555626988', category: 'hoodies', name: 'Худи с начесом и капюшоном', color: 'Графитовые', sizes: ['S', 'M', 'L', 'XL'], price: 1908, oldPrice: 6890, cheap: 1790, recent: 28, rating: 4.9, reviews: 6023, left: 27, verified: true, seller: 'Street Base', tags: ['толстовка', 'худи', 'начес', 'утепленные', 'флис'], promoTier: 1 },
+  { id: 'h_champion', sku: '150132617', category: 'hoodies', name: 'Худи Champion классический', color: 'Синие', sizes: ['S', 'M', 'L', 'XL'], price: 3490, oldPrice: 7490, cheap: 3190, recent: 29, rating: 4.9, reviews: 942, left: 9, verified: true, seller: 'Champion Brand', tags: ['толстовка', 'худи', 'спорт'], promoTier: 2 },
+  { id: 'h_hood_cap', sku: '557085669', category: 'hoodies', name: 'Толстовка с капюшоном свободная', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 1283, oldPrice: 2490, cheap: 1190, recent: 30, rating: 5.0, reviews: 2, left: 14, verified: false, seller: 'Denim Store', tags: ['толстовка', 'худи', 'свободные'], promoTier: 3 },
+  { id: 'h_veneziani', sku: '702481372', category: 'hoodies', name: 'Толстовка DON VENEZIANI с капюшоном', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2190, oldPrice: 7900, cheap: 1990, recent: 15, rating: 4.9, reviews: 148, left: 8, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'черные', 'кофта'], promoTier: 2 },
   { id: 'h_milk', sku: '702481373', category: 'hoodies', name: 'Худи мужской оверсайз с начёсом молочный', color: 'Молочный', sizes: ['S', 'M', 'L', 'XL'], price: 2590, oldPrice: 5900, cheap: 2390, recent: 16, rating: 4.9, reviews: 864, left: 12, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'оверсайз', 'утепленные', 'флис', 'начес'], promoTier: 2 },
   { id: 'h_hoodie_dv', sku: '702481374', category: 'hoodies', name: 'Худи DON VENEZIANI утеплённый', color: 'Графитовые', sizes: ['S', 'M', 'L', 'XL'], price: 2390, oldPrice: 5200, cheap: 2150, recent: 17, rating: 4.8, reviews: 503, left: 17, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'утепленные'], promoTier: 3 },
-  { id: 'h_club', sku: '702481375', category: 'hoodies', name: 'Толстовка Club BB Hoodie базовая', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 3290, oldPrice: 6490, cheap: 2990, recent: 18, rating: 4.7, reviews: 412, left: 26, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'черные'], promoTier: 2 },
+  { id: 'h_club', sku: '702481375', category: 'hoodies', name: 'Толстовка Club BB Hoodie базовая', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 3290, oldPrice: 6490, cheap: 2990, recent: 18, rating: 4.7, reviews: 412, left: 26, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'черные'], promoTier: 0 },
   { id: 'h_zip', sku: '702481376', category: 'hoodies', name: 'Толстовка на молнии зип-худи оверсайз', color: 'Чёрные', sizes: ['S', 'M', 'L', 'XL'], price: 2890, oldPrice: 6100, cheap: 2590, recent: 19, rating: 4.9, reviews: 629, left: 15, verified: true, seller: 'Denim Store', tags: ['толстовка', 'худи', 'зип', 'оверсайз', 'черные'], promoTier: 1 },
   { id: 'h_oversize', sku: '702481377', category: 'hoodies', name: 'Худи свободного кроя плотный футер', color: 'Серые', sizes: ['S', 'M', 'L', 'XL'], price: 2490, oldPrice: 4990, cheap: 2290, recent: 20, rating: 4.8, reviews: 318, left: 40, verified: false, seller: 'Denim Store', tags: ['толстовка', 'худи', 'свободные', 'оверсайз'], promoTier: 0 },
   { id: 'h_sand', sku: '702481378', category: 'hoodies', name: 'Толстовка свитшот базовый хлопковый', color: 'Бежевый', sizes: ['S', 'M', 'L', 'XL'], price: 1990, oldPrice: 4200, cheap: 1790, recent: 21, rating: 4.8, reviews: 214, left: 34, verified: false, seller: 'Denim Store', tags: ['толстовка', 'свитшот'], promoTier: 3 },
@@ -166,14 +160,35 @@ const defaultProducts = [
 
 let products = defaultProducts.map(p => ({ ...p }));
 
+/* Расширенный склад ПВЗ («Товары рядом») — 11 моделей на Мира и 9 на Ярославской */
 const stock = [
-  { id: 'J-M-01', product: 'classic', point: 'mira', size: 'M', price: 2590 },
-  { id: 'J-L-02', product: 'classic', point: 'yara', size: 'L', price: 2590 },
-  { id: 'J-S-03', product: 'washed', point: 'yara', size: 'S', price: 3190 },
-  { id: 'J-M-04', product: 'straight', point: 'mira', size: 'M', price: 3590 },
-  { id: 'H-M-05', product: 'h_milk', point: 'mira', size: 'M', price: 2590 },
-  { id: 'H-L-06', product: 'h_veneziani', point: 'mira', size: 'L', price: 2190 },
-  { id: 'H-M-07', product: 'h_zip', point: 'yara', size: 'M', price: 2890 },
+  // ПВЗ: проспект Мира, 182 (джинсы + толстовки/худи)
+  { id: 'M-J-01', product: 'j_bigar', point: 'mira', size: 'M', price: 2863 },
+  { id: 'M-J-02', product: 'j_bigar', point: 'mira', size: 'L', price: 2863 },
+  { id: 'M-J-03', product: 'j_diagonal', point: 'mira', size: 'M', price: 3199 },
+  { id: 'M-J-04', product: 'j_marcopolo', point: 'mira', size: 'L', price: 16480 },
+  { id: 'M-J-05', product: 'j_justdenim', point: 'mira', size: 'L', price: 3490 },
+  { id: 'M-J-06', product: 'classic', point: 'mira', size: 'M', price: 2590 },
+  { id: 'M-J-07', product: 'washed', point: 'mira', size: 'L', price: 3190 },
+  { id: 'M-H-08', product: 'h_tvoe', point: 'mira', size: 'M', price: 1229 },
+  { id: 'M-H-09', product: 'h_tvoe', point: 'mira', size: 'L', price: 1229 },
+  { id: 'M-H-10', product: 'h_naches', point: 'mira', size: 'M', price: 1908 },
+  { id: 'M-H-11', product: 'h_champion', point: 'mira', size: 'L', price: 3490 },
+  { id: 'M-H-12', product: 'h_hood_cap', point: 'mira', size: 'M', price: 1283 },
+  { id: 'M-H-13', product: 'h_milk', point: 'mira', size: 'M', price: 2590 },
+  { id: 'M-H-14', product: 'h_veneziani', point: 'mira', size: 'L', price: 2190 },
+
+  // ПВЗ: Ярославская улица, 21А (джинсы + толстовки/худи)
+  { id: 'Y-J-01', product: 'j_bigar', point: 'yara', size: 'L', price: 2863 },
+  { id: 'Y-J-02', product: 'j_diagonal', point: 'yara', size: 'S', price: 3199 },
+  { id: 'Y-J-03', product: 'j_justdenim', point: 'yara', size: 'M', price: 3490 },
+  { id: 'Y-J-04', product: 'classic', point: 'yara', size: 'L', price: 2590 },
+  { id: 'Y-J-05', product: 'washed', point: 'yara', size: 'S', price: 3190 },
+  { id: 'Y-J-06', product: 'denim', point: 'yara', size: 'M', price: 2990 },
+  { id: 'Y-H-07', product: 'h_tvoe', point: 'yara', size: 'S', price: 1229 },
+  { id: 'Y-H-08', product: 'h_naches', point: 'yara', size: 'L', price: 1908 },
+  { id: 'Y-H-09', product: 'h_champion', point: 'yara', size: 'M', price: 3490 },
+  { id: 'Y-H-10', product: 'h_zip', point: 'yara', size: 'M', price: 2890 },
 ];
 
 const app = document.querySelector('#app');
@@ -187,6 +202,7 @@ const state = {
   from: 'home',
   q: '',
   category: '',
+  nearbyCategory: '', // '' | 'jeans' | 'hoodies'
   sort: 'relevance',
   only: false,
   verifiedOnly: false,
@@ -199,8 +215,8 @@ const state = {
   unit: '',
   tab: 'fast',
   // Состояние кабинета Селлера
-  sellerTab: 'promo', // 'promo' | 'live' | 'analytics' | 'products'
-  sellerSelectedProduct: 'h_milk',
+  sellerTab: 'promo',
+  sellerSelectedProduct: 'h_tvoe',
   sellerCatFilter: 'all',
   sellerBalance: 1500,
   sellerSpent: 1550,
@@ -210,7 +226,7 @@ const state = {
   lastUpgraded: null,
   // Покупательские данные
   favorites: new Set(),
-  cart: [], // { key, id?, product, size, point, price, slot, qty }
+  cart: [],
   reserved: new Set(),
   completed: new Set(),
   order: [],
@@ -225,10 +241,15 @@ const productById = id => products.find(p => p.id === id);
 const unitById = id => stock.find(x => x.id === id);
 const isFree = x => !state.reserved.has(x.id) && !state.completed.has(x.id);
 const unitsFor = (p, size = null) => stock.filter(x => x.product === p.id && x.point === state.point && (!size || x.size === size) && isFree(x));
+const nearbyProducts = (cat = '') => rankProducts(
+  products.filter(p => unitsFor(p).length > 0 && (!cat || p.category === cat)),
+  '',
+  'relevance'
+).map(x => x.p);
 const tierRank = tier => (PROMO_TIERS[tier]?.rank ?? 4);
 const imgFor = p => imageUrls[p.imgKey || p.id] || imageUrls.classic;
 const imgFallbackAttr = p => {
-  const fb = fallbackHoodieByKey[p.imgKey || p.id];
+  const fb = fallbackImgByKey[p.imgKey || p.id];
   return fb ? `referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fb}'"` : '';
 };
 
@@ -237,7 +258,7 @@ const cartItemForProduct = (productId, size = null) =>
   state.cart.find(item => item.product === productId && (!size || item.size === size));
 
 const offerTabs = [['fast', 'Быстрее доставка'], ['cheap', 'Ниже цена'], ['local', 'Уже в ПВЗ']];
-const storageKey = 'ozon-mvp-v6-dualmode';
+const storageKey = 'ozon-mvp-v7-nearby';
 
 function saveSession() {
   try {
@@ -505,11 +526,11 @@ const svgCheck = '<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="t
 const svgCrownSmall = '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 8c-1.11 0-1 3.563-1 6.375C3 18.125 4.501 20 12.001 20s9-1.875 9-5.625C21 11.563 21.11 8 20 8c-1 0-1.824 2.425-2.57 3.39-.43.556-.622.641-.961-.171C15.8 9.619 14 5 12 5s-3.8 4.619-4.469 6.219c-.34.812-.531.726-.96.172C5.824 10.425 5 8 4 8"/></svg>';
 const svgBag = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M10.19 1.393a.834.834 0 0 1 1.084.465L12.73 5.5h.842c.896 0 1.345 0 1.594.288s.185.732.056 1.619l-.227 1.553c-.396 2.721-.593 4.082-1.532 4.895s-2.315.812-5.065.812H7.6c-2.75 0-4.126 0-5.065-.812S1.4 11.68 1.003 8.96L.777 7.407C.648 6.52.584 6.077.833 5.788c.25-.288.698-.288 1.594-.288h.842l1.457-3.642a.834.834 0 0 1 1.547.618L5.063 5.5h5.873l-1.21-3.024a.834.834 0 0 1 .464-1.083"/></svg>';
 
-/* Карточка покупателя: НИКАКИХ подписей уровней, только коронка у 1 класса + интерактивная кнопка корзины */
-function buyerCard(p) {
+function buyerCard(p, forceLocal = false) {
   const found = unitsFor(p);
   const liked = state.favorites.has(p.id);
-  const unit = (state.page === 'nearby' || state.only) ? found[0] : null;
+  const isLocal = found.length > 0;
+  const unit = (forceLocal || state.page === 'nearby' || state.only || isLocal) ? found[0] : null;
   const size = found[0]?.size || (p.sizes.includes('M') ? 'M' : p.sizes[0]);
   const offer = unit ? 'local' : 'fast';
   const href = routeURL('product', { product: p.id, size, offer, unit: unit?.id || '' });
@@ -517,6 +538,7 @@ function buyerCard(p) {
   const pct = discountPct(p);
   const inCart = cartItemForProduct(p.id);
   const isPremiumCrown = (p.promoTier || 0) === 1;
+  const availSizes = [...new Set(found.map(u => u.size))].join(', ');
 
   return `<article class="oz-card">
     <div class="oz-card-visual">
@@ -525,7 +547,7 @@ function buyerCard(p) {
       </a>
       <button type="button" class="oz-fav-btn" data-action="favorite" data-id="${p.id}" aria-pressed="${liked}" aria-label="В избранное">${svgHeart}</button>
       <div class="oz-card-badges-bottom">
-        ${found.length ? '<span class="oz-pill local">Сегодня в ПВЗ</span>' : pct >= 60 ? '<span class="oz-pill wow">✦ Вау-цены</span>' : ''}
+        ${isLocal ? `<span class="oz-pill local">В ПВЗ сегодня${availSizes ? ` · ${availSizes}` : ''}</span>` : pct >= 60 ? '<span class="oz-pill wow">✦ Вау-цены</span>' : ''}
       </div>
     </div>
     <div class="oz-card-body">
@@ -552,9 +574,9 @@ function buyerCard(p) {
             </div>
           </div>
         ` : `
-          <button type="button" class="oz-card-cta" data-action="quickAdd" data-id="${p.id}" data-size="${size}">
+          <button type="button" class="oz-card-cta ${isLocal ? 'is-nearby-cta' : ''}" data-action="quickAdd" data-id="${p.id}" data-size="${size}">
             ${svgBag}
-            <span>${found.length ? 'Сегодня' : 'Завтра'}</span>
+            <span>${isLocal ? 'Сегодня в ПВЗ' : 'Завтра'}</span>
           </button>
         `}
         ${isPremiumCrown ? `<div class="oz-corner-crown" title="Премиум-продавец"><span>${svgCrownSmall}</span></div>` : ''}
@@ -563,7 +585,6 @@ function buyerCard(p) {
   </article>`;
 }
 
-/* Карточка в «Живой выдаче» Селлера: явные позиции, баллы релевантности, классы и быстрый буст */
 function inspectorCard(p, position, relScore) {
   const tier = p.promoTier || 0;
   const tierMeta = PROMO_TIERS[tier];
@@ -612,6 +633,7 @@ function inspectorCard(p, position, relScore) {
    ========================================================= */
 function storefront() {
   const ranked = rankProducts(products, '', 'relevance').map(x => x.p);
+  const localItems = nearbyProducts('');
   const jeansCount = products.filter(p => p.category === 'jeans').length;
   const hoodiesCount = products.filter(p => p.category === 'hoodies').length;
 
@@ -622,37 +644,59 @@ function storefront() {
         <h1>Джинсы и толстовки<br>на каждый день.</h1>
         <p>Доставка завтра или примерка сегодня в ближайшем ПВЗ. Добавляйте в корзину в один клик или оформляйте сразу.</p>
         <div class="oz-hero-actions">
-          <a href="#/search?category=jeans" class="oz-hero-btn" data-action="category" data-id="jeans">Джинсы (${jeansCount})</a>
+          <a href="#/nearby" class="oz-hero-btn" data-action="nearby">Товары рядом сегодня (${localItems.length})</a>
+          <a href="#/search?category=jeans" class="oz-hero-btn-alt" data-action="category" data-id="jeans">Джинсы (${jeansCount})</a>
           <a href="#/search?category=hoodies" class="oz-hero-btn-alt" data-action="category" data-id="hoodies">Толстовки и худи (${hoodiesCount})</a>
         </div>
       </div>
       <div class="oz-hero-photos">
-        <img src="${imageUrls.washed}" alt="Джинсы">
-        <img src="${imageUrls.h_veneziani}" ${imgFallbackAttr({ id: 'h_veneziani' })} alt="Толстовка">
-        <img src="${imageUrls.h_milk}" ${imgFallbackAttr({ id: 'h_milk' })} alt="Худи">
+        <img src="${imageUrls.j_bigar}" ${imgFallbackAttr({ id: 'j_bigar' })} alt="Джинсы">
+        <img src="${imageUrls.h_tvoe}" ${imgFallbackAttr({ id: 'h_tvoe' })} alt="Худи ТВОЕ">
+        <img src="${imageUrls.h_naches}" ${imgFallbackAttr({ id: 'h_naches' })} alt="Худи с начёсом">
       </div>
     </section>
 
     <section class="oz-cat-cards">
+      <a href="#/nearby" class="oz-cat-banner is-nearby-banner" data-action="nearby">
+        <div>
+          <strong>Товары рядом · ${localItems.length} шт.</strong>
+          <span>Уже на ${points[state.point]} — примерка сегодня</span>
+        </div>
+        <span class="oz-cat-emoji">📍</span>
+      </a>
       <a href="#/search?category=jeans" class="oz-cat-banner" data-action="category" data-id="jeans">
-        <div><strong>Джинсы</strong><span>${jeansCount} моделей · багги, прямые, утеплённые</span></div>
+        <div><strong>Джинсы</strong><span>${jeansCount} моделей · бананы, багги, прямые, зимние</span></div>
         <span class="oz-cat-emoji">👖</span>
       </a>
       <a href="#/search?category=hoodies" class="oz-cat-banner" data-action="category" data-id="hoodies">
-        <div><strong>Толстовки и худи</strong><span>${hoodiesCount} моделей · оверсайз, флис, зип-худи</span></div>
+        <div><strong>Толстовки и худи</strong><span>${hoodiesCount} моделей · базовые, с начёсом, оверсайз</span></div>
         <span class="oz-cat-emoji">🧥</span>
       </a>
-      <a href="#/nearby" class="oz-cat-banner" data-action="nearby">
-        <div><strong>Товары рядом в ПВЗ</strong><span>Примерка сегодня на ${points[state.point]}</span></div>
-        <span class="oz-cat-emoji">📍</span>
-      </a>
+    </section>
+
+    <section class="oz-nearby-shelf">
+      <div class="oz-nearby-shelf-head">
+        <div class="oz-nearby-title-wrap">
+          <h2>Уже в вашем ПВЗ</h2>
+          <span class="oz-nearby-chip"><span class="nearby-live-dot"></span>Забрать и примерить сегодня</span>
+        </div>
+        <div class="oz-nearby-controls">
+          <select id="point" class="oz-nearby-point-select" aria-label="Выбрать ПВЗ">
+            ${Object.entries(points).map(([k, v]) => `<option value="${k}" ${state.point === k ? 'selected' : ''}>ПВЗ: ${v}</option>`).join('')}
+          </select>
+          <a href="#/nearby" class="linkbtn" data-action="nearby">Все товары рядом (${localItems.length}) →</a>
+        </div>
+      </div>
+      <div class="grid home-grid">
+        ${localItems.slice(0, 5).map(p => buyerCard(p, true)).join('')}
+      </div>
     </section>
 
     <div class="section-head">
       <h2>Рекомендуем для вас</h2>
       <a href="#/search" class="linkbtn" data-action="category" data-id="">Смотреть весь каталог (${products.length}) →</a>
     </div>
-    <section class="grid home-grid">${ranked.map(buyerCard).join('')}</section>
+    <section class="grid home-grid">${ranked.map(p => buyerCard(p)).join('')}</section>
   `;
 }
 
@@ -691,7 +735,7 @@ function catalog() {
         </div>
 
         <div class="oz-filter-group">
-          <h3>Доставка</h3>
+          <h3>Товары рядом</h3>
           <label class="oz-switch-row">
             <span>Уже в ПВЗ<small>Забрать сегодня</small></span>
             <input id="only" type="checkbox" ${state.only ? 'checked' : ''}>
@@ -747,22 +791,45 @@ function catalog() {
 }
 
 function nearby() {
-  const items = rankProducts(products.filter(p => unitsFor(p).length), '', 'relevance').map(x => x.p);
+  const allLocal = nearbyProducts('');
+  const jeansLocal = nearbyProducts('jeans');
+  const hoodiesLocal = nearbyProducts('hoodies');
+  const items = state.nearbyCategory ? nearbyProducts(state.nearbyCategory) : allLocal;
+
   return `
-    <div class="section-head">
+    <div class="oz-breadcrumbs">
+      <a href="#/" class="linkbtn" data-action="home">Главная</a>
+      <span>•</span>
+      <strong>Товары рядом</strong>
+    </div>
+
+    <section class="nearby-hero-strip">
       <div>
-        <h1>Товары рядом</h1>
-        <p class="muted" style="margin:4px 0 0">Уже в выбранном пункте выдачи — можно примерить и забрать сегодня.</p>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+          <h1 style="margin:0">Товары рядом</h1>
+          <span class="oz-nearby-chip"><span class="nearby-live-dot"></span>${allLocal.length} моделей в наличии сегодня</span>
+        </div>
+        <p class="muted" style="margin:0">Эти джинсы и толстовки уже находятся в выбранном ПВЗ — можно прийти, примерить и выкупить без ожидания доставки.</p>
       </div>
       <div style="min-width:260px">
-        <select id="point" class="oz-select">
+        <select id="point" class="oz-nearby-point-select" style="width:100%;height:42px">
           ${Object.entries(points).map(([k, v]) => `<option value="${k}" ${state.point === k ? 'selected' : ''}>ПВЗ: ${v}</option>`).join('')}
         </select>
       </div>
+    </section>
+
+    <div class="nearby-filter-row">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="offer-tab" data-action="nearbyCategory" data-id="" aria-pressed="${state.nearbyCategory === ''}">Все (${allLocal.length})</button>
+        <button type="button" class="offer-tab" data-action="nearbyCategory" data-id="jeans" aria-pressed="${state.nearbyCategory === 'jeans'}">👖 Джинсы (${jeansLocal.length})</button>
+        <button type="button" class="offer-tab" data-action="nearbyCategory" data-id="hoodies" aria-pressed="${state.nearbyCategory === 'hoodies'}">🧥 Толстовки и худи (${hoodiesLocal.length})</button>
+      </div>
+      <span class="muted small">Оплата после примерки в ПВЗ</span>
     </div>
+
     ${items.length
-      ? `<section class="grid home-grid">${items.map(buyerCard).join('')}</section>`
-      : `<div class="empty-box">В этом ПВЗ пока нет свободных товаров. Выберите другой пункт.</div>`}
+      ? `<section class="grid home-grid">${items.map(p => buyerCard(p, true)).join('')}</section>`
+      : `<div class="empty-box">В этом ПВЗ пока нет свободных товаров выбранной категории. Выберите другой пункт выдачи.</div>`}
   `;
 }
 
@@ -850,7 +917,7 @@ function productPage() {
         <div class="pdp-labels">
           <span class="pdp-label">Примерка и оплата при получении</span>
           ${p.verified ? `<span class="pdp-label is-green">${svgCheck} Бренд проверен</span>` : ''}
-          ${offer.kind === 'local' ? '<span class="pdp-label is-green">Уже в ПВЗ сегодня</span>' : ''}
+          ${offer.kind === 'local' ? '<span class="pdp-label is-green">📍 Уже в ПВЗ сегодня</span>' : ''}
         </div>
       </div>
 
@@ -865,8 +932,12 @@ function productPage() {
 
         <div class="pdp-section-title">Размер</div>
         <div class="sizes">
-          ${p.sizes.map(sz => `<button type="button" class="size-btn" data-action="size" data-id="${sz}" aria-pressed="${state.size === sz}">${sz}</button>`).join('')}
+          ${p.sizes.map(sz => {
+            const hasLocal = unitsFor(p, sz).length > 0;
+            return `<button type="button" class="size-btn" data-action="size" data-id="${sz}" aria-pressed="${state.size === sz}" title="${hasLocal ? 'Есть в ПВЗ сегодня' : ''}">${sz}${hasLocal ? ' •' : ''}</button>`;
+          }).join('')}
         </div>
+        ${unitsFor(p).length ? '<div class="small" style="color:#0b8a36;margin-top:6px">• Размеры с точкой уже лежат в выбранном ПВЗ</div>' : ''}
 
         <div class="pdp-section-title">Характеристики</div>
         <dl class="pdp-specs">
@@ -908,7 +979,7 @@ function productPage() {
                   </div>
                 </div>
               ` : offer.kind === 'local' ? `
-                <button type="button" class="pdp-buy-btn" data-action="addLocal" data-id="${offer.unit.id}">
+                <button type="button" class="pdp-buy-btn" style="background:#0ea64b" data-action="addLocal" data-id="${offer.unit.id}">
                   <span>Добавить в корзину</span>
                   <small>${offer.delivery}</small>
                 </button>
@@ -986,8 +1057,7 @@ function offersModal() {
 }
 
 /* =========================================================
-   РЕЖИМ ПРОДАВЦА (OZON SELLER):
-   1) Продвижение  2) Живая выдача  3) Аналитика  4) Мои товары
+   РЕЖИМ ПРОДАВЦА (OZON SELLER)
    ========================================================= */
 function simulatePosition(targetId, hypotheticalTier, categoryScope = '') {
   const copy = products
@@ -1008,8 +1078,7 @@ function productEconomics(p) {
   const revenue = orders * p.price;
   const cost = meta.price;
   const drr = revenue > 0 ? ((cost / revenue) * 100) : 0;
-  const margin = Math.round(revenue * 0.28) - cost;
-  return { views, clicks, orders, revenue, cost, drr, margin };
+  return { views, clicks, orders, revenue, cost, drr };
 }
 
 function sellerPromoView() {
@@ -1084,7 +1153,7 @@ function sellerPromoView() {
           </ul>
           <div class="tier-card-footer">
             <button type="button" class="tier-buy-btn" data-action="buyTier" data-id="${selectedProd.id}" data-tier="${t}" ${isCurrent ? 'disabled style="opacity:.65;cursor:default"' : ''}>
-              ${isCurrent ? `✓ Активен для выбранного товара` : `Подключить ${meta.code} за ${rub(meta.price)}`}
+              ${isCurrent ? '✓ Активен для выбранного товара' : `Подключить ${meta.code} за ${rub(meta.price)}`}
             </button>
           </div>
         </article>`;
@@ -1159,7 +1228,7 @@ function sellerLiveView() {
       </div>
 
       <div class="inspector-search-row">
-        <input id="liveQuery" class="oz-input" style="max-width:320px" value="${clean(state.liveQuery)}" placeholder="Запрос: толстовка, джинсы, чёрные, оверсайз...">
+        <input id="liveQuery" class="oz-input" style="max-width:320px" value="${clean(state.liveQuery)}" placeholder="Запрос: худи, толстовка, джинсы, чёрные...">
         <select id="liveCategory" class="oz-select" style="width:auto;min-width:170px">
           <option value="" ${!state.liveCategory ? 'selected' : ''}>Все категории</option>
           <option value="jeans" ${state.liveCategory === 'jeans' ? 'selected' : ''}>👖 Джинсы</option>
@@ -1173,7 +1242,7 @@ function sellerLiveView() {
           <option value="0" ${state.liveTierFilter === '0' ? 'selected' : ''}>Без продвижения</option>
         </select>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${['', 'толстовка', 'джинсы', 'чёрные', 'утеплённые', 'оверсайз'].map(q => `<button type="button" class="offer-tab" data-action="setLiveQuery" data-id="${q}" aria-pressed="${state.liveQuery === q}">${q || 'Все'}</button>`).join('')}
+          ${['', 'худи', 'толстовка', 'джинсы', 'чёрные', 'утеплённые'].map(q => `<button type="button" class="offer-tab" data-action="setLiveQuery" data-id="${q}" aria-pressed="${state.liveQuery === q}">${q || 'Все'}</button>`).join('')}
         </div>
       </div>
     </section>
@@ -1192,40 +1261,33 @@ function sellerAnalyticsView() {
   const totalAdCost = rows.reduce((s, r) => s + r.eco.cost, 0);
   const avgDRR = totalRev > 0 ? ((totalAdCost / totalRev) * 100).toFixed(2) : '0.00';
 
-  // Данные по уровням
   const byTier = [1, 2, 3, 0].map(t => {
     const group = rows.filter(r => (r.p.promoTier || 0) === t);
     return {
-      tier: t,
-      meta: PROMO_TIERS[t],
-      count: group.length,
-      views: group.reduce((s, r) => s + r.eco.views, 0),
+      tier: t, meta: PROMO_TIERS[t], count: group.length,
       orders: group.reduce((s, r) => s + r.eco.orders, 0),
       revenue: group.reduce((s, r) => s + r.eco.revenue, 0),
-      cost: group.reduce((s, r) => s + r.eco.cost, 0),
     };
   });
   const maxTierRev = Math.max(1, ...byTier.map(x => x.revenue));
 
-  // Данные по 7 дням (SVG график)
   const dayWeights = [0.84, 0.91, 0.96, 1.04, 1.12, 1.08, 1.18];
   const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
   const dailyViews = dayWeights.map(w => Math.round((totalViews / 7) * w));
   const maxDayV = Math.max(1, ...dailyViews);
-  const pts = dailyViews.map((v, i) => {
-    const x = 40 + i * 86;
-    const y = 170 - Math.round((v / maxDayV) * 130);
-    return { x, y, v, label: dayLabels[i] };
-  });
+  const pts = dailyViews.map((v, i) => ({
+    x: 40 + i * 86,
+    y: 170 - Math.round((v / maxDayV) * 130),
+    v,
+    label: dayLabels[i],
+  }));
   const polyPoints = pts.map(pt => `${pt.x},${pt.y}`).join(' ');
   const areaPoints = `40,180 ${polyPoints} ${pts[pts.length - 1].x},180`;
 
-  // По категориям
   const catStats = Object.entries(categories).map(([key, title]) => {
     const grp = rows.filter(r => r.p.category === key);
     return {
-      key, title,
-      count: grp.length,
+      key, title, count: grp.length,
       promoted: grp.filter(r => (r.p.promoTier || 0) > 0).length,
       revenue: grp.reduce((s, r) => s + r.eco.revenue, 0),
       orders: grp.reduce((s, r) => s + r.eco.orders, 0),
@@ -1412,7 +1474,7 @@ function sellerApp() {
 function favorites() {
   const items = products.filter(p => state.favorites.has(p.id));
   return `<div class="section-head"><h1>Избранное</h1></div>
-    ${items.length ? `<section class="grid home-grid">${items.map(buyerCard).join('')}</section>`
+    ${items.length ? `<section class="grid home-grid">${items.map(p => buyerCard(p)).join('')}</section>`
       : `<div class="empty-box"><h3>В избранном пока пусто</h3><p class="muted">Нажимайте на сердечко, чтобы сохранить понравившиеся товары.</p><a href="#/search" class="btn primary" data-action="category" data-id="">Перейти в каталог</a></div>`}`;
 }
 
@@ -1585,6 +1647,9 @@ function render() {
   document.querySelector('.oz-search-clear').hidden = !state.q;
   document.querySelector('#searchScope').value = state.category;
 
+  const nearbyCountEl = document.querySelector('#nearbyNavCount');
+  if (nearbyCountEl) nearbyCountEl.textContent = String(nearbyProducts('').length);
+
   const totalUnits = totalCartUnits();
   const cartBadge = document.querySelector('#count');
   cartBadge.textContent = String(totalUnits);
@@ -1752,6 +1817,7 @@ document.addEventListener('click', e => {
       break;
     case 'home': state.mode = 'buyer'; state.q = ''; state.category = ''; state.only = false; go('home'); break;
     case 'nearby': state.mode = 'buyer'; state.q = ''; state.category = ''; state.only = false; go('nearby'); break;
+    case 'nearbyCategory': state.nearbyCategory = id || ''; render(); break;
     case 'sellerTab':
       state.mode = 'seller';
       state.sellerTab = id;
@@ -1783,7 +1849,7 @@ document.addEventListener('click', e => {
       break;
     }
     case 'category': state.mode = 'buyer'; state.q = ''; state.category = id; state.only = false; go('catalog'); break;
-    case 'point': go(state.page === 'nearby' ? 'nearby' : 'catalog'); document.querySelector('#point')?.focus(); break;
+    case 'point': go('nearby'); document.querySelector('#point')?.focus(); break;
     case 'backListing': go(state.from || 'catalog'); break;
     case 'resetFilter':
       state.q = ''; state.only = false; state.verifiedOnly = false;
@@ -1839,10 +1905,13 @@ document.addEventListener('click', e => {
     case 'tab': state.tab = id; render(); break;
     case 'size':
       state.size = id;
-      if (state.offer === 'local') {
-        const u = unitsFor(p, id)[0];
-        state.unit = u?.id || '';
-        if (!u) state.offer = 'fast';
+      const localInSize = unitsFor(p, id)[0];
+      if (localInSize) {
+        state.offer = 'local';
+        state.unit = localInSize.id;
+      } else if (state.offer === 'local') {
+        state.unit = '';
+        state.offer = 'fast';
       }
       render();
       break;
